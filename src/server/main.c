@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "server.h"
+#include "tcpserver.h"
 #include <string.h>
 main()
 {
-	int s=start_UDP_socket();
+	int s=start_TCP_socket();
 
 }
