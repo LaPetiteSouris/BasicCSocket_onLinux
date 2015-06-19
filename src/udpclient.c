@@ -14,7 +14,7 @@ main()
 
 int startUDPClient()
 {
-	int result=0;
+	int result = 0;
 
 //Open a client socket
 	int socket_fd;
@@ -47,9 +47,9 @@ int startUDPClient()
 			if (inet_pton(AF_INET, IP, &server_address.sin_addr.s_addr))
 			{
 				//Send ping message to server
-				char buff[]="Ping";
+				char buff[] = "Ping";
 				socklen_t server_addr_len = sizeof(server_address);
-				sendto(socket_fd, buff, buff_size,0, (struct sockaddr *)&server_address, server_addr_len);
+				sendto(socket_fd, buff, buff_size, 0, (struct sockaddr *)&server_address, server_addr_len);
 			}
 
 		}

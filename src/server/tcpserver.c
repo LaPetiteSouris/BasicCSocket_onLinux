@@ -40,8 +40,8 @@ int start_TCP_socket()
 			socklen_t peer_addr_len = sizeof(peer_addr);
 			listen(socket_fd, 5);
 			char buff[255];
-			char buff_response[] = "Received data. Connection accepted. Terminating.";
-			int len = sizeof(buff);
+			char buff_response[] = "Received data. Process completed. \0";
+			int len = sizeof(buff_response);
 			for (;;)
 			{
 				//Accept connection
@@ -53,16 +53,17 @@ int start_TCP_socket()
 				} else
 				{
 					//Receiving connection request from client
-					int n = read(new_sock, buff, buff_size );
+					int n = recv(new_sock, buff, buff_size,0 );
 					if (n < 0)
 					{
 						printf("Error reading socket");
 						result = 0;
 					} else
 					{
-						printf("Receiving data from client. Responding...");
+						printf("Receiving data from client. Content is: \n");
+						printf("%s \n", buff);
 						//Response
-						n = write(new_sock, buff_response, len);
+						n = send(new_sock, buff_response, len,0);
 						if (n < 0)
 						{
 							printf("Error writing socket");
