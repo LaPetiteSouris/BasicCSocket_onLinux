@@ -53,7 +53,7 @@ int start_TCP_socket()
 				} else
 				{
 					//Receiving connection request from client
-					int n = recv(new_sock, buff, buff_size,0 );
+					int n = recv(new_sock, buff, buff_size, 0 );
 					if (n < 0)
 					{
 						printf("Error reading socket");
@@ -63,7 +63,7 @@ int start_TCP_socket()
 						printf("Receiving data from client. Content is: \n");
 						printf("%s \n", buff);
 						//Response
-						n = send(new_sock, buff_response, len,0);
+						n = send(new_sock, buff_response, len, 0);
 						if (n < 0)
 						{
 							printf("Error writing socket");

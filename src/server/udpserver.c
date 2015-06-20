@@ -6,7 +6,10 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
-int start_UDP_socket()
+#include "../serialization/udp_query_packet.h"
+#include <sys/types.h>
+
+int start_UDP()
 {	int result = 0;
 	int port = 8080;
 	int socket_fd;
@@ -35,13 +38,16 @@ int start_UDP_socket()
 			client_addr_len = sizeof(client_address);
 			//Add one character as terminator
 			char  buff[256];
+			struct udpquery incoming;
+
 			for (;;) {
 				int message_size = recvfrom(socket_fd, buff, 255 , 0, &client_address, &client_addr_len );
+				memcpy(&incoming, buff, sizeof(struct udpquery));
 				//Echo back
-				sendto(socket_fd, buff, buff_size, 0, &client_address, client_addr_len);
+				//sendto(socket_fd, buff, buff_size, 0, &client_address, client_addr_len);
 				//buff[255] = '\0';
 				printf("Server receiving request \n");
-				printf("%s\n", buff);
+				printf("%s\n", incoming.buff);
 			}
 
 		} else

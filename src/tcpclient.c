@@ -16,10 +16,10 @@ int startTCPClient()
 	int socket_fd;
 	socklen_t client_addr_len;
 	int port = 8080;
-	char buff[]="Ping";
+	char buff[] = "Ping";
 	int buff_size = sizeof(buff);
 	char buff_recv[255];
-	int buff_recv_size=sizeof(buff_recv);
+	int buff_recv_size = sizeof(buff_recv);
 	char *IP = "127.0.0.1";
 	//Open socket here
 	struct sockaddr_in client_address;
@@ -54,7 +54,7 @@ int startTCPClient()
 				printf("Connection to server failed");
 				result = 0;
 
-			} else 
+			} else
 			{
 				printf("Received response from server: ");
 				printf("%s \n", buff_recv);

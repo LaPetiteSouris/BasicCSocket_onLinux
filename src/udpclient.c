@@ -1,4 +1,3 @@
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
@@ -7,9 +6,27 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include "serialization/udp_query_packet.h"
+
+
+
 main()
 {
 	startUDPClient();
+
+}
+
+struct udpquery packdata()
+{
+	//Declare query packet frame here.
+	char s[5] = "Ping";
+	srand(time(NULL));
+	int32_t sid = rand();
+	int32_t tid = rand();
+	struct udpquery data = {'D', 'S', 4, sid, tid, 4, "any"};
+	strcpy(data.buff, s);
+	return data;
+
 }
 
 int startUDPClient()
@@ -47,9 +64,11 @@ int startUDPClient()
 			if (inet_pton(AF_INET, IP, &server_address.sin_addr.s_addr))
 			{
 				//Send ping message to server
-				char buff[] = "Ping";
+				void * buf;
+				struct udpquery data = packdata();
+				memcpy(buf, &data, sizeof(struct udpquery));
 				socklen_t server_addr_len = sizeof(server_address);
-				sendto(socket_fd, buff, buff_size, 0, (struct sockaddr *)&server_address, server_addr_len);
+				sendto(socket_fd, buf, sizeof(buf), 0, (struct sockaddr *)&server_address, server_addr_len);
 			}
 
 		}
@@ -60,3 +79,7 @@ int startUDPClient()
 		return result;
 	}
 }
+
+
+
+
