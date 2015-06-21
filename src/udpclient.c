@@ -7,24 +7,20 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "serialization/udp_query_packet.h"
+#include <time.h>
 
-
-
-main()
-{
-	startUDPClient();
-
+int32_t random1_6() {
+	return ((rand() % 6) + 1);
 }
-
 struct udpquery packdata()
 {
 	//Declare query packet frame here.
 	char s[5] = "Ping";
 	srand(time(NULL));
-	int32_t sid = rand();
-	int32_t tid = rand();
+	int32_t sid = random1_6();
+	int32_t tid = random1_6();
 	struct udpquery data = {'D', 'S', 4, sid, tid, 4, "any"};
-	strcpy(data.buff, s);
+	strncpy(data.msg, s, sizeof(data.msg));
 	return data;
 
 }
@@ -56,19 +52,23 @@ int startUDPClient()
 			char *IP = "127.0.0.1";
 			int port = 8080;
 			struct sockaddr_in server_address;
-			int buff_size = 255;
+			int buff_size = 5;
 			memset((char *)&server_address, 0, sizeof(server_address));
 			//Assign value to server address
 			server_address.sin_family = AF_INET;
 			server_address.sin_port = htons(port);
 			if (inet_pton(AF_INET, IP, &server_address.sin_addr.s_addr))
 			{
+				//Serialization
+				struct udpquery * buf = (struct udpquery *)malloc(sizeof(struct udpquery));
+				struct udpquery query;
+				query = packdata();
+				memcpy(buf, &query, sizeof(struct udpquery));
 				//Send ping message to server
-				void * buf;
-				struct udpquery data = packdata();
-				memcpy(buf, &data, sizeof(struct udpquery));
 				socklen_t server_addr_len = sizeof(server_address);
-				sendto(socket_fd, buf, sizeof(buf), 0, (struct sockaddr *)&server_address, server_addr_len);
+				sendto(socket_fd, buf, sizeof(*buf), 0, (struct sockaddr *)&server_address, server_addr_len);
+				free(buf);
+
 			}
 
 		}
@@ -83,3 +83,8 @@ int startUDPClient()
 
 
 
+main()
+{
+	startUDPClient();
+
+}

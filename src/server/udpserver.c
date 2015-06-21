@@ -2,13 +2,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
-#include "../serialization/udp_query_packet.h"
 #include <sys/types.h>
-
+#include "../serialization/udp_query_packet.h"
 int start_UDP()
 {	int result = 0;
 	int port = 8080;
@@ -36,18 +36,20 @@ int start_UDP()
 		{
 			struct sockaddr client_address;
 			client_addr_len = sizeof(client_address);
-			//Add one character as terminator
-			char  buff[256];
+			//Allocate space before deserialization
+			struct udpquery * buff = (struct udpquery *)malloc(sizeof(struct udpquery));
 			struct udpquery incoming;
 
 			for (;;) {
-				int message_size = recvfrom(socket_fd, buff, 255 , 0, &client_address, &client_addr_len );
+				int message_size = recvfrom(socket_fd, buff, sizeof(*buff) , 0, &client_address, &client_addr_len );
+				//De-serialization
 				memcpy(&incoming, buff, sizeof(struct udpquery));
 				//Echo back
 				//sendto(socket_fd, buff, buff_size, 0, &client_address, client_addr_len);
 				//buff[255] = '\0';
-				printf("Server receiving request \n");
-				printf("%s\n", incoming.buff);
+				printf("Server receiving request. Request content is:  \n");
+				printf("%s\n", incoming.msg);
+				free(buff);
 			}
 
 		} else

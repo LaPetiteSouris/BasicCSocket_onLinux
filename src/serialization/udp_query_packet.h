@@ -1,5 +1,5 @@
-#ifndef UDP_Q_PACKET_H
-#define UDP_Q_PACKET_H
+#ifndef UDPQuerry_H
+#define UDPQuerry_H
 struct udpquery
 {
 	char version;
@@ -9,9 +9,9 @@ struct udpquery
 	int32_t tid;
 	int msg_len;
 	//Messag is 255 byte max
-	char buff[255];
+	char msg[5];
 	//int hmac_len;
 	//char * hmac;
 
-}
+};
 #endif
