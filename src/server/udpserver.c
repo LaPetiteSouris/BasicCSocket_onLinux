@@ -7,7 +7,6 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include "../serialization/udp_query_packet.h"
 int start_UDP()
 {	int result = 0;
@@ -39,26 +38,51 @@ int start_UDP()
 			//Allocate space before deserialization
 			struct udpquery * buff = (struct udpquery *)malloc(sizeof(struct udpquery));
 			struct udpquery incoming;
-
 			for (;;) {
 				int message_size = recvfrom(socket_fd, buff, sizeof(*buff) , 0, &client_address, &client_addr_len );
-				//De-serialization
-				memcpy(&incoming, buff, sizeof(struct udpquery));
-				//Echo back
-				//sendto(socket_fd, buff, buff_size, 0, &client_address, client_addr_len);
-				//buff[255] = '\0';
-				printf("Server receiving request. Request content is:  \n");
-				printf("%s\n", incoming.msg);
-				free(buff);
+				printf("%s\n", "Server received a query." );
+				if (message_size > 0 && sizeof(*buff) == sizeof(incoming))
+				{
+					//De-serialization
+					memcpy(&incoming, buff, sizeof(struct udpquery));
+					int packet_verification = verify_packet(&incoming);
+					if (packet_verification == 1)
+					{
+						printf("Query follows defined protocol. Accepted. Request content is:  \n");
+						printf("%s\n\n", incoming.msg);
+					}
+					else if (packet_verification == 0)
+					{
+						printf("Client query does not follow protocol. Rejected. \n\n");
+					}
+					//Echo back
+					//sendto(socket_fd, buff, buff_size, 0, &client_address, client_addr_len);
+					//buff[255] = '\0';
+				}
 			}
-
 		} else
 		{
 			result = 0;
 		}
-
-
 	}
 	return result;
+}
 
+//Check if the packet arrive intact and strictly follow the protocol
+int verify_packet(struct udpquery * ptr)
+{
+	int result = 1;
+	char version = ptr->version;
+	char direction = ptr ->direction;
+	int msg_len = ptr->msg_len;
+	int len = ptr -> len;
+	int32_t sid = ptr->sid;
+	int32_t tid = ptr->tid;
+	if (sizeof(version) != 1 || sizeof(direction) != 1
+	        || sizeof(msg_len) > 4 || sizeof(len) > 4
+	        || sizeof(ptr -> msg) != msg_len || sizeof(tid) > 4 || sizeof(sid) > 4)
+	{
+		result = 0;
+	}
+	return result;
 }

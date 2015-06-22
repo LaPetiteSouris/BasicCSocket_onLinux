@@ -6,9 +6,20 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "serialization/udp_query_packet.h"
 #include <time.h>
+struct udpquery
+{
+	int version;
+	int len;
+	int32_t sid;
+	int32_t tid;
+	int msg_len;
+	//Messag is 255 byte max
+	char msg[5];
+	//int hmac_len;
+	//char * hmac;
 
+};
 int32_t random1_6() {
 	return ((rand() % 6) + 1);
 }
@@ -19,7 +30,7 @@ struct udpquery packdata()
 	srand(time(NULL));
 	int32_t sid = random1_6();
 	int32_t tid = random1_6();
-	struct udpquery data = {'D', 'S', 4, sid, tid, 5, "any"};
+	struct udpquery data = {1, 4, sid, tid, 4, "any"};
 	strncpy(data.msg, s, sizeof(data.msg));
 	return data;
 

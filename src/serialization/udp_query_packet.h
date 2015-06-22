@@ -1,5 +1,6 @@
 #ifndef UDPQuerry_H
 #define UDPQuerry_H
+#include <sys/types.h>
 struct udpquery
 {
 	char version;
