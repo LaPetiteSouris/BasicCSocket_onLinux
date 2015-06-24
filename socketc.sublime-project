@@ -3,7 +3,7 @@
 	[
 		"-I/src/server/",
 		"-I/src/serialization/",
-		"-I/usr/include",
+		"-I/usr/include/",
 		"-I/usr/include/linux"
 	],
 	"folders":

@@ -7,7 +7,6 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
-#include "../serialization/udp_query_packet.h"
 int start_UDP()
 {	int result = 0;
 	int port = 8080;
@@ -85,4 +84,21 @@ int verify_packet(struct udpquery * ptr)
 		result = 0;
 	}
 	return result;
+}
+
+char * generateSHA(SHA256_CTX c, char * input, size_t len)
+{
+	char * hash=(char *) malloc(32);
+	if (!SHA256_Init(&c))
+	{
+		hash = NULL;
+	}
+	if (!SHA256_Update(&c, input, len))
+	{
+		hash = NULL;
+	}
+	if (!SHA256_Final(hash, &c)) {
+		hash = NULL;
+	}
+	return hash;
 }
