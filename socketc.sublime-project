@@ -1,0 +1,15 @@
+{
+	"cc_include_options":
+	[
+		"-I/src/server/",
+		"-I/src/serialization/",
+		"-I/usr/include",
+		"-I/usr/include/linux"
+	],
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	]
+}

@@ -80,9 +80,6 @@ int startUDPClient()
 	}
 }
 
-
-
-
 main()
 {
 	startUDPClient();

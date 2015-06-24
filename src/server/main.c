@@ -1,8 +1,9 @@
 
 #include "udpserver.h"
+#include <sys/socket.h>
 
 main()
 {
-	int s=start_UDP();
-
+	int result=start_UDP();
+	
 }
