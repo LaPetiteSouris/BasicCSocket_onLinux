@@ -6,8 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "serialization/udp_query_packet.h"
+#include "../serialization/udp_query_packet.h"
 #include <time.h>
+#include "udpclient.h"
 
 int32_t random1_6() {
 	return ((rand() % 6) + 1);
@@ -28,7 +29,6 @@ struct udpquery packdata()
 int startUDPClient()
 {
 	int result = 0;
-
 //Open a client socket
 	int socket_fd;
 	socklen_t client_addr_len;
@@ -76,12 +76,7 @@ int startUDPClient()
 		{
 			result = 0;
 		}
-		return result;
 	}
+	return result;
 }
 
-main()
-{
-	startUDPClient();
-
-}

@@ -1,11 +1,11 @@
 #include <stdio.h>
-#include "udpserver.h"
+#include "tcpserver.h"
 #include <string.h>
 #include <stdlib.h>
 
 main()
 {
-	//int result=start_UDP();
+	int result=start_TCP_socket();
 	char  input[4] = "Ping";
 	SHA256_CTX cxt;
 	char * hash = generateSHA(cxt, input, strlen(input));

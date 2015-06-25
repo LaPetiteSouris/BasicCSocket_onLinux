@@ -1,24 +1,27 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
-main()
-{
-	startTCPClient();
+#include "tcpclient.h"
+#include <time.h>
+
+int32_t random1_6() {
+	return ((rand() % 6) + 1);
 }
+
 int startTCPClient()
 {	int result = 0;
 	//Open a client socket
 	int socket_fd;
 	socklen_t client_addr_len;
 	int port = 8080;
-	char buff[] = "Ping";
-	int buff_size = sizeof(buff);
 	char buff_recv[255];
+	int buff_size = 255;
 	int buff_recv_size = sizeof(buff_recv);
 	char *IP = "127.0.0.1";
 	//Open socket here
@@ -45,19 +48,30 @@ int startTCPClient()
 		}
 		else
 		{
+			char str[255];
+			printf("Enter your username: ");
+			scanf("%s", str);
+			struct tcpquery * buf = (struct tcpquery *)malloc(sizeof(struct tcpquery));
+			struct tcpquery query;
+			query = packdata(str);
+			memcpy(buf, &query, sizeof(struct tcpquery));
 			//Connection established. Start sending data to TCP server
-			send(socket_fd, buff, buff_size, 0);
+			send(socket_fd, buf, buff_size, 0);
 			//Receving response from server.
+
+
 			int n = recv(socket_fd, buff_recv, buff_recv_size, 0);
 			if (n < 0)
 			{
 				printf("Connection to server failed");
 				result = 0;
-
 			} else
 			{
+				struct tcpquery * buff = (struct tcpquery *)malloc(sizeof(struct tcpquery));
+				struct tcpquery incoming;
 				printf("Received response from server: ");
-				printf("%s \n", buff_recv);
+				memcpy(&incoming, buff, sizeof(struct tcpquery));
+				printf("%s \n", incoming.command);
 			}
 		}
 	}
@@ -72,3 +86,10 @@ int startTCPClient()
 
 }
 
+
+struct tcpquery packdata( char msg[255])
+{
+	struct tcpquery data = {"DISTRIB2015", 255, 'D', "any"};
+	strncpy(data.command, msg, sizeof(data.command));
+	return data;
+}

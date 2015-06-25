@@ -86,19 +86,3 @@ int verify_packet(struct udpquery * ptr)
 	return result;
 }
 
-char * generateSHA(SHA256_CTX c, char * input, size_t len)
-{
-	char * hash=(char *) malloc(32);
-	if (!SHA256_Init(&c))
-	{
-		hash = NULL;
-	}
-	if (!SHA256_Update(&c, input, len))
-	{
-		hash = NULL;
-	}
-	if (!SHA256_Final(hash, &c)) {
-		hash = NULL;
-	}
-	return hash;
-}

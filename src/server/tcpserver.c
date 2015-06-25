@@ -2,11 +2,24 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <time.h>
+#include "../serialization/tcp_query_packet.h"
+int32_t random1_6() {
+	return ((rand() % 6) + 1);
+}
+
+struct tcpquery packdata( char msg[255])
+{
+	struct tcpquery data = {"DISTRIB2015", 255, 'D', "any"};
+	strncpy(data.command, msg, sizeof(data.command));
+	return data;
+}
 
 int start_TCP_socket()
 {
@@ -48,7 +61,6 @@ int start_TCP_socket()
 				int new_sock = accept(socket_fd, (struct sockaddr *) &peer_addr, &peer_addr_len );
 				if (new_sock < 0)
 				{
-
 					result = 0;
 				} else
 				{
@@ -62,17 +74,24 @@ int start_TCP_socket()
 					{
 						printf("Receiving data from client. Content is: \n");
 						printf("%s \n", buff);
+						//Verify username and password.
+						//Create a random number
+						int R = random1_6();
+						struct tcpquery =packdata(char *msg)
 						//Response
-						n = send(new_sock, buff_response, len, 0);
+						n = send(new_sock, R, len, 0);
 						if (n < 0)
 						{
 							printf("Error writing socket");
 							result = 0;
+						} else
+						{
+							//Receive H2 from client
+							recv(new_sock, buff, buff_size,0);
 						}
 					}
 				}
 			}
-
 		}
 		else
 		{
@@ -80,6 +99,21 @@ int start_TCP_socket()
 		}
 	}
 	return result;
-
 }
 
+char * generateSHA(SHA256_CTX c, char * input, size_t len)
+{
+	char * hash = (char *) malloc(32);
+	if (!SHA256_Init(&c))
+	{
+		hash = NULL;
+	}
+	if (!SHA256_Update(&c, input, len))
+	{
+		hash = NULL;
+	}
+	if (!SHA256_Final(hash, &c)) {
+		hash = NULL;
+	}
+	return hash;
+}

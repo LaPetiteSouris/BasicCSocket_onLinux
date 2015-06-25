@@ -15,4 +15,14 @@ struct udpquery
 	//char * hmac;
 
 };
+struct udpquery packdata();
+/*** Function to serialize data before sending
+Remember to free allocated pointer after usage
+***/
+struct udpquery * serialization_tcp(struct udpquery data);
+/*** Function to de-serialize received data
+Allocated memory freed automatically
+***/
+struct udpquery deserialization_tcp(struct udpquery * ptr);
+int verify_udp_packet(struct udpquery * ptr);
 #endif
