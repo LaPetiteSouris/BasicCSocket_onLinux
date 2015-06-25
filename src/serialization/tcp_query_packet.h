@@ -8,7 +8,7 @@ struct tcpquery
 	char mode;
 	char command[256];
 };
-struct tcpquery packdata(char msg[255]);
+struct tcpquery pack_tcp_data(char msg[255]);
 /*** Function to serialize data before sending
 Remember to free allocated pointer after usage
 ***/

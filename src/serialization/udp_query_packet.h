@@ -15,7 +15,7 @@ struct udpquery
 	//char * hmac;
 
 };
-struct udpquery packdata();
+struct udpquery pack_udp_data();
 /*** Function to serialize data before sending
 Remember to free allocated pointer after usage
 ***/

@@ -1,4 +1,3 @@
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,12 +5,22 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include "tcpclient.h"
-#include <time.h>
+#include <stdio.h>
+#include "../serialization/tcp_query_packet.h"
+char * prompt_and_read(char * prompt) {
+	char * response;
+	char * bufsize;
+	printf("%s", prompt);
+	asprintf(&bufsize, "%%%us", BUFSIZ);
 
-int32_t random1_6() {
-	return ((rand() % 6) + 1);
+	if ((response = malloc(BUFSIZ + 1)) == NULL) {
+		fprintf(stderr, "out of memory\n");
+		exit(1);
+	}
+	scanf(bufsize, response);
+	free(bufsize);
+	return response;
 }
 
 int startTCPClient()
@@ -20,9 +29,7 @@ int startTCPClient()
 	int socket_fd;
 	socklen_t client_addr_len;
 	int port = 8080;
-	char buff_recv[255];
 	int buff_size = 255;
-	int buff_recv_size = sizeof(buff_recv);
 	char *IP = "127.0.0.1";
 	//Open socket here
 	struct sockaddr_in client_address;
@@ -48,30 +55,49 @@ int startTCPClient()
 		}
 		else
 		{
+			char * userinput = prompt_and_read("Enter your username: ");
 			char str[255];
-			printf("Enter your username: ");
-			scanf("%s", str);
-			struct tcpquery * buf = (struct tcpquery *)malloc(sizeof(struct tcpquery));
-			struct tcpquery query;
-			query = packdata(str);
-			memcpy(buf, &query, sizeof(struct tcpquery));
+			strncpy(str, userinput, 255);
+			struct tcpquery query = pack_tcp_data(str);
+			struct tcpquery * buf = serialization_tcp(query);
 			//Connection established. Start sending data to TCP server
 			send(socket_fd, buf, buff_size, 0);
-			//Receving response from server.
-
-
-			int n = recv(socket_fd, buff_recv, buff_recv_size, 0);
+			//Free buffer allocation
+			free(buf);
+			//Receving response from server
+			struct tcpquery * buff_recv = (struct tcpquery *) malloc(sizeof(struct tcpquery));
+			int n = recv(socket_fd, buff_recv, sizeof(struct tcpquery), 0);
 			if (n < 0)
 			{
 				printf("Connection to server failed");
 				result = 0;
 			} else
 			{
-				struct tcpquery * buff = (struct tcpquery *)malloc(sizeof(struct tcpquery));
-				struct tcpquery incoming;
-				printf("Received response from server: ");
-				memcpy(&incoming, buff, sizeof(struct tcpquery));
-				printf("%s \n", incoming.command);
+				struct tcpquery incoming = deserialization_tcp(buff_recv);
+				int r = verify_tcp_packet(&incoming);
+				if (r == 1)
+				{	//Check servr response if username exists
+					int userexist = strcmp(incoming.command, "0");
+					if (userexist == 0) {
+						printf("Username does not exist.");
+
+					}
+					else
+					{
+						//This is a random number received from TCP server_address
+						//We concanate it with user password P2 to generate H1 SH256 hash value
+						char R[255];
+						strncpy(R, incoming.command, sizeof(R));
+						printf("Received response from server. ");
+						//To-DO: Prompt for user name Password.
+						char * pass = prompt_and_read("Please enter your password: ");
+						char p2[255];
+						strncpy(p2, pass, 255);
+						//Then concanate password P2 with random number R from server
+						//SHA256 hash calculation(H1 value).incoming
+						//Send H1 to server for verification
+					}
+				}
 			}
 		}
 	}
@@ -86,10 +112,3 @@ int startTCPClient()
 
 }
 
-
-struct tcpquery packdata( char msg[255])
-{
-	struct tcpquery data = {"DISTRIB2015", 255, 'D', "any"};
-	strncpy(data.command, msg, sizeof(data.command));
-	return data;
-}

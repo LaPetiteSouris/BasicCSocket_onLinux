@@ -10,16 +10,12 @@
 #include <sys/types.h>
 #include <time.h>
 #include "../serialization/tcp_query_packet.h"
+
 int32_t random1_6() {
 	return ((rand() % 6) + 1);
 }
 
-struct tcpquery packdata( char msg[255])
-{
-	struct tcpquery data = {"DISTRIB2015", 255, 'D', "any"};
-	strncpy(data.command, msg, sizeof(data.command));
-	return data;
-}
+
 
 int start_TCP_socket()
 {
@@ -52,9 +48,8 @@ int start_TCP_socket()
 			memset((char *)&peer_addr, 0, sizeof(peer_addr));
 			socklen_t peer_addr_len = sizeof(peer_addr);
 			listen(socket_fd, 5);
-			char buff[255];
-			char buff_response[] = "Received data. Process completed. \0";
-			int len = sizeof(buff_response);
+			//Allocate space for the buffer server is about to receive
+			struct tcpquery * buffer = (struct tcpquery *) malloc(sizeof(struct tcpquery));
 			for (;;)
 			{
 				//Accept connection
@@ -64,31 +59,65 @@ int start_TCP_socket()
 					result = 0;
 				} else
 				{
-					//Receiving connection request from client
-					int n = recv(new_sock, buff, buff_size, 0 );
+					//Receiving connection request from client.This is an username send for verification
+					int n = recv(new_sock, buffer, sizeof(*buffer), 0 );
 					if (n < 0)
 					{
 						printf("Error reading socket");
 						result = 0;
 					} else
 					{
-						printf("Receiving data from client. Content is: \n");
-						printf("%s \n", buff);
-						//Verify username and password.
-						//Create a random number
-						int R = random1_6();
-						struct tcpquery =packdata(char *msg)
-						//Response
-						n = send(new_sock, R, len, 0);
-						if (n < 0)
-						{
-							printf("Error writing socket");
-							result = 0;
+						printf("Receiving data from client. \n");
+						//Deserialize data
+						struct tcpquery incoming = deserialization_tcp(buffer);
+						int verification = verify_tcp_packet(&incoming);
+						if (verification == 1)
+						{	int password = getpassword(incoming.command);
+							if (password != 0)
+							{
+								//Username exists.
+								//Create a random number
+								int R = random1_6();
+								char r[255];
+								sprintf(r, "%d", R);
+								struct tcpquery query = pack_tcp_data(r);
+								//Serialize response
+								buffer = serialization_tcp(query);
+								//TO-Do Calculate P1+R1=>H2 value
+								//Response
+								n = send(new_sock, buffer, sizeof(*buffer), 0);
+								if (n < 0)
+								{
+									printf("Error writing socket");
+									result = 0;
+								} else
+								{
+									//Receive H1 from client
+									int size = recv(new_sock, buffer, sizeof(buffer), 0);
+									if (size > 0)
+									{
+										//TO-DOCompare H1 with H2
+
+									}
+								}
+
+							} else
+							{
+								int R = 0;
+								char r[255];
+								sprintf(r, "%d", R);
+								struct tcpquery query = pack_tcp_data(r);
+								//Serialize response
+								buffer = serialization_tcp(query);
+								//Response
+								n = send(new_sock, buffer, sizeof(*buffer), 0);
+							}
 						} else
 						{
-							//Receive H2 from client
-							recv(new_sock, buff, buff_size,0);
+							result = 0;
+							printf("Packet received did not follow defined protocol. Rejected.");
 						}
+
 					}
 				}
 			}
@@ -100,6 +129,19 @@ int start_TCP_socket()
 	}
 	return result;
 }
+
+int getpassword(char username[255])
+{
+	int result = 123;
+	char user[255] = "debug\0";
+	int compare_result = strcmp(username, user);
+	if (compare_result != 0)
+	{
+		result = 0;
+	}
+	return result;
+}
+
 
 char * generateSHA(SHA256_CTX c, char * input, size_t len)
 {
