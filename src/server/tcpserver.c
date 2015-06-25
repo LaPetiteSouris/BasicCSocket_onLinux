@@ -79,28 +79,57 @@ int start_TCP_socket()
 								//Create a random number
 								int R = random1_6();
 								char r[255];
+								char pass[3];
+								char H1[255];
 								sprintf(r, "%d", R);
+								sprintf(pass, "%d", password);
 								struct tcpquery query = pack_tcp_data(r);
 								//Serialize response
 								buffer = serialization_tcp(query);
 								//TO-Do Calculate P1+R1=>H2 value
-								//Response
-								n = send(new_sock, buffer, sizeof(*buffer), 0);
-								if (n < 0)
+								if (sizecheck(pass, r) == 1)
 								{
-									printf("Error writing socket");
-									result = 0;
-								} else
-								{
-									//Receive H1 from client
-									int size = recv(new_sock, buffer, sizeof(buffer), 0);
-									if (size > 0)
+									//Size does not reach limit. Proceed to concat
+									strcpy(H1, pass);
+									strcat(H1, r);
+									//Response
+									n = send(new_sock, buffer, sizeof(*buffer), 0);
+									if (n < 0)
 									{
-										//TO-DOCompare H1 with H2
+										printf("Error writing socket");
+										result = 0;
+									} else
+									{
+										//Receive H1 from client
+										int size = recv(new_sock, buffer, sizeof(buffer), 0);
+										if (size > 0)
+										{
+											incoming = deserialization_tcp(buffer);
+											verification = verify_tcp_packet(&incoming);
+											if (verification == 1)
+											{
+												char H2[255];
+												strcpy(H2, incoming.command);
+												//TO-DOCompare H1 with H2
+												int cmp = strcmp(H1, H2);
+												if(cmp==0)
+												{
+													result=1;
+													printf("Authorization completed");
+												}
+											} else
+											{
+												printf("Packet received did not follow defined protocol. Rejected.");
+												result = 0;
+											}
 
+										}
 									}
 								}
-
+								else
+								{	result = 0;
+									printf("Password and random string key size exceed transmission limit 255 character.");
+								}
 							} else
 							{
 								int R = 0;
@@ -136,6 +165,16 @@ int getpassword(char username[255])
 	char user[255] = "debug\0";
 	int compare_result = strcmp(username, user);
 	if (compare_result != 0)
+	{
+		result = 0;
+	}
+	return result;
+}
+
+int sizecheck(char array1[], char array2[])
+{
+	int result = 1;
+	if ((strlen(array1) + strlen(array2) + 1) >= 255)
 	{
 		result = 0;
 	}

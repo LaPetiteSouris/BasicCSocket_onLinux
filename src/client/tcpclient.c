@@ -62,8 +62,6 @@ int startTCPClient()
 			struct tcpquery * buf = serialization_tcp(query);
 			//Connection established. Start sending data to TCP server
 			send(socket_fd, buf, buff_size, 0);
-			//Free buffer allocation
-			free(buf);
 			//Receving response from server
 			struct tcpquery * buff_recv = (struct tcpquery *) malloc(sizeof(struct tcpquery));
 			int n = recv(socket_fd, buff_recv, sizeof(struct tcpquery), 0);
@@ -93,6 +91,20 @@ int startTCPClient()
 						char * pass = prompt_and_read("Please enter your password: ");
 						char p2[255];
 						strncpy(p2, pass, 255);
+						char H2[255];
+						if (sizecheck(p2, R) == 1)
+						{
+							strcpy(H2, p2);
+							strcat(H2, R);
+							query = pack_tcp_data(H2);
+							buf = serialization_tcp(query);
+							send(socket_fd, buf, buff_size, 0);
+							free(buf);
+						}
+						else
+						{
+							printf("Your input exceeds transmission limit");
+						}
 						//Then concanate password P2 with random number R from server
 						//SHA256 hash calculation(H1 value).incoming
 						//Send H1 to server for verification
@@ -112,3 +124,12 @@ int startTCPClient()
 
 }
 
+int sizecheck(char array1[], char array2[])
+{
+	int result = 1;
+	if ((strlen(array1) + strlen(array2) + 1) >= 255)
+	{
+		result = 0;
+	}
+	return result;
+}
