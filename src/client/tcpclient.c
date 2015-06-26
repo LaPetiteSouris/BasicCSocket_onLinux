@@ -61,6 +61,7 @@ int startTCPClient()
 			struct tcpquery query = pack_tcp_data(str);
 			struct tcpquery * buf = serialization_tcp(query);
 			//Connection established. Start sending data to TCP server
+			printf("Sending data");
 			send(socket_fd, buf, buff_size, 0);
 			//Receving response from server
 			struct tcpquery * buff_recv = (struct tcpquery *) malloc(sizeof(struct tcpquery));

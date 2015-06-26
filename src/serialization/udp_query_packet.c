@@ -34,7 +34,7 @@ struct udpquery deserialization_udp(struct udpquery * ptr)
 	free(buff);
 	return incoming;
 }
-int verify_udp_package(struct udpquery * ptr)
+int verify_udp_packet(struct udpquery * ptr)
 {
 	int result = 1;
 	char version = ptr->version;

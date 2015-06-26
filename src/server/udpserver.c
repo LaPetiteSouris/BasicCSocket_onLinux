@@ -44,7 +44,7 @@ int start_UDP()
 				{
 					//De-serialization
 					memcpy(&incoming, buff, sizeof(struct udpquery));
-					int packet_verification = verify_packet(&incoming);
+					int packet_verification = verify_udp_packet(&incoming);
 					if (packet_verification == 1)
 					{
 						printf("Query follows defined protocol. Accepted. Request content is:  \n");
@@ -67,22 +67,5 @@ int start_UDP()
 	return result;
 }
 
-//Check if the packet arrive intact and strictly follow the protocol
-int verify_packet(struct udpquery * ptr)
-{
-	int result = 1;
-	char version = ptr->version;
-	char direction = ptr ->direction;
-	int msg_len = ptr->msg_len;
-	int len = ptr -> len;
-	int32_t sid = ptr->sid;
-	int32_t tid = ptr->tid;
-	if (sizeof(version) != 1 || sizeof(direction) != 1
-	        || sizeof(msg_len) > 4 || sizeof(len) > 4
-	        || sizeof(ptr -> msg) != msg_len || sizeof(tid) > 4 || sizeof(sid) > 4)
-	{
-		result = 0;
-	}
-	return result;
-}
+
 

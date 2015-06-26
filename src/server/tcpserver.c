@@ -71,8 +71,11 @@ int start_TCP_socket()
 						//Deserialize data
 						struct tcpquery incoming = deserialization_tcp(buffer);
 						int verification = verify_tcp_packet(&incoming);
+						printf("Verification completed");
+						printf("%d\n", verification);
 						if (verification == 1)
-						{	int password = getpassword(incoming.command);
+						{
+							int password = getpassword(incoming.command);
 							if (password != 0)
 							{
 								//Username exists.
@@ -112,16 +115,23 @@ int start_TCP_socket()
 												strcpy(H2, incoming.command);
 												//TO-DOCompare H1 with H2
 												int cmp = strcmp(H1, H2);
-												if(cmp==0)
+												if (cmp == 0)
 												{
-													result=1;
+													result = 1;
 													printf("Authorization completed");
+												} else {
+													result = 0;
+													printf("Authorization failed");
 												}
 											} else
 											{
 												printf("Packet received did not follow defined protocol. Rejected.");
 												result = 0;
 											}
+
+										} else
+										{
+											result = 0;
 
 										}
 									}
@@ -130,8 +140,7 @@ int start_TCP_socket()
 								{	result = 0;
 									printf("Password and random string key size exceed transmission limit 255 character.");
 								}
-							} else
-							{
+							} else {
 								int R = 0;
 								char r[255];
 								sprintf(r, "%d", R);
@@ -141,7 +150,7 @@ int start_TCP_socket()
 								//Response
 								n = send(new_sock, buffer, sizeof(*buffer), 0);
 							}
-						} else
+						} else 
 						{
 							result = 0;
 							printf("Packet received did not follow defined protocol. Rejected.");
@@ -149,6 +158,7 @@ int start_TCP_socket()
 
 					}
 				}
+				close(socket_fd);
 			}
 		}
 		else
