@@ -74,7 +74,6 @@ int startTCPClient()
 				{
 					printf("Connection to server failed");
 					exit(1);
-					result = 0;
 				} else
 				{
 
@@ -93,29 +92,31 @@ int startTCPClient()
 							//We concanate it with user password P2 to generate H1 SH256 hash value
 							char R[255];
 							strncpy(R, incoming.command, sizeof(R));
-							printf("Received response from server. ");
+							printf("Received response from server. \n");
 							//To-DO: Prompt for user name Password.
 							char * pass = prompt_and_read("Please enter your password: ");
-							char p2[255];
-							strncpy(p2, pass, 255);
-							char H1[255];
-							if (sizecheck(p2, R) == 1)
+							if (authenciation(socket_fd, pass, R))
 							{
-								strcpy(H1, p2);
-								strcat(H1, R);
-								struct tcpquery hash = signed_withSHA(H1);
-								buf = serialization_tcp(hash);
-								send(socket_fd, buf, sizeof(*buf), 0);
-								free(buf);
-								break;
+								//Receive authentication result from server
+								if (recv(socket_fd, buff_recv, sizeof(struct tcpquery), 0) > 0)
+								{
+									if (check_auth_result(buff_recv))
+									{
+										printf("Authentication completed successfully ! Welcome !...\n");
+										result = 1;
+										break;
+									} else
+									{
+										printf("Authentication failed ! Connection terminated for security reason.\n");
+										break;
+									}
+
+								} else
+								{
+									printf("Connection to server failed\n");
+									exit(1);
+								}
 							}
-							else
-							{
-								printf("Your input exceeds transmission limit");
-							}
-							//Then concanate password P2 with random number R from server
-							//SHA256 hash calculation(H1 value).incoming
-							//Send H1 to server for verification
 						}
 					}
 				}
@@ -134,6 +135,28 @@ int startTCPClient()
 
 }
 
+int authenciation(int socket, char * pass, char R[])
+{
+	int result = 0;
+	char p2[255];
+	strncpy(p2, pass, 255);
+	char H1[255];
+	if (sizecheck(p2, R) == 1)
+	{
+		strcpy(H1, p2);
+		strcat(H1, R);
+		struct tcpquery hash = signed_withSHA(H1);
+		struct tcpquery * buf = serialization_tcp(hash);
+		send(socket, buf, sizeof(*buf), 0);
+		result = 1;
+	}
+	else
+	{
+		printf("Your input exceeds transmission limit.\n");
+	}
+	return result;
+}
+
 int sizecheck(char array1[], char array2[])
 {
 	int result = 1;
@@ -142,4 +165,23 @@ int sizecheck(char array1[], char array2[])
 		result = 0;
 	}
 	return result;
+}
+
+int check_auth_result(struct tcpquery * buff)
+{	int r = 0;
+	struct tcpquery incoming = deserialization_tcp(buff);
+	if (verify_tcp_packet(&incoming) == 1)
+	{
+		int cmp = strcmp(incoming.command, "Auth_Suc");
+		if (cmp == 0)
+		{	r = 1;
+		}
+	}
+	else
+	{
+		printf("Packet received did not follow defined protocol. Rejected. \n");
+
+	}
+
+	return r;
 }

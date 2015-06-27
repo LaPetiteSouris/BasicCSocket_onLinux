@@ -100,11 +100,13 @@ int start_TCP_socket()
 							{
 								if (H_value_compare(buffer2))
 								{
-									printf("Authorization completed. Success...\n");
+									printf("Authentication completed. Success...\n");
+									auth_client(new_sock, 1);
 								}
 								else
 								{
-									printf("Authorization Failed\n");
+									printf("Authentication Failed\n");
+									auth_client(new_sock, 0);
 								}
 							} else {
 								printf("Cannot generate authetication token\n");
@@ -226,4 +228,24 @@ int sizecheck(char array1[], char array2[])
 	return result;
 }
 
+void auth_client(int new_sock, int i)
+{
+	if (i)
+	{
+		//Authentication completed
+		struct tcpquery query = pack_tcp_data("Auth_Suc");
+		//Serialize response
+		struct tcpquery *buffer = serialization_tcp(query);
+		//Response
+		send(new_sock, buffer, sizeof(*buffer), 0);
+	}
+	else
+	{
+		struct tcpquery query = pack_tcp_data("Auth_Failed");
+		//Serialize response
+		struct tcpquery *buffer = serialization_tcp(query);
+		//Response
+		send(new_sock, buffer, sizeof(*buffer), 0);
+	}
+}
 
