@@ -1,6 +1,5 @@
 #ifndef TCPQuerry_H
 #define TCPQuerry_H
-
 struct tcpquery
 {
 	char str[11];
@@ -18,4 +17,5 @@ Allocated memory freed automatically
 ***/
 struct tcpquery deserialization_tcp(struct tcpquery * ptr);
 int verify_tcp_packet(struct tcpquery * ptr);
+struct tcpquery signed_withSHA(char input[]);
 #endif

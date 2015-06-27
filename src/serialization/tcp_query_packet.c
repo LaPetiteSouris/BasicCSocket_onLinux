@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <openssl/sha.h>
 struct tcpquery pack_tcp_data(char msg[255])
 {
 	struct tcpquery data = {"DISTRIB2015", 255, 'D', "any"};
@@ -40,4 +41,25 @@ int verify_tcp_packet(struct tcpquery * ptr)
 	}
 	return result;
 
+}
+
+struct tcpquery signed_withSHA(char input[])
+{
+	SHA256_CTX c;
+	char * hash = (char *) malloc(255);
+	char hash_arr[255];
+	if (!SHA256_Init(&c))
+	{
+		hash = NULL;
+	}
+	if (!SHA256_Update(&c, input, strlen(input)))
+	{
+		hash = NULL;
+	}
+	if (!SHA256_Final(hash, &c)) {
+		hash = NULL;
+	}
+	strncpy(hash_arr, hash, sizeof(hash_arr));
+	struct tcpquery query = pack_tcp_data(hash_arr);
+	return query;
 }

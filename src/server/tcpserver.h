@@ -1,6 +1,5 @@
 #ifndef TCPSERVER_H
 #define TCPSERVER_H
-#include <openssl/sha.h>
 #include "../serialization/tcp_query_packet.h"
 int start_TCP_socket();
 int getpassword(char username[255]);
@@ -10,5 +9,5 @@ int H_value_compare(struct tcpquery * buffer);
 int generateH2value(int socket_fd, int password, int r);
 int verifyH1(int socket_fd, char H1[]);
 int sizecheck(char array1[], char array2[]);
-char * generateSHA(SHA256_CTX context, char * input, size_t len);
+
 #endif

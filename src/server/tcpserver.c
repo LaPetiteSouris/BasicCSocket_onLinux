@@ -9,7 +9,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <time.h>
-//This is the H2 value, generate by server for client verification
+//This is the H2 value(not yet signed by SHA256), generate by server for client verification
+char H2_notsigned[255];
+//This is the H2 value signed by SHA256
 char H2[255];
 //This is random token generate by server.
 int R;
@@ -59,7 +61,7 @@ int start_TCP_socket()
 				{
 					exit(1);
 				}
-				printf("Receiving connection from client. \n");
+				printf("\n\nReceiving connection from client. \n");
 				for (;;) {
 
 					//Receiving connection request from client.This is an username send for verification
@@ -70,7 +72,7 @@ int start_TCP_socket()
 						exit(1);
 					} else if (n == 0)
 					{
-						printf("Connection error or closed\n");
+						printf("Connection closed\n");
 						break;
 					}
 					struct tcpquery incoming = deserialization_tcp(buffer);
@@ -156,6 +158,7 @@ void rejectconnection(int new_sock)
 	send(new_sock, buffer, sizeof(*buffer), 0);
 }
 
+
 int randomtokenhandling(int new_sock)
 {
 	R = random1_6();
@@ -168,6 +171,25 @@ int randomtokenhandling(int new_sock)
 	int n = send(new_sock, buffer, sizeof(*buffer), 0);
 	return n;
 
+}
+
+int  generateH2value(int new_sock, int password, int R)
+{
+	int result = 0;
+	char r[255];
+	char pass[3];
+	sprintf(r, "%d", R);
+	sprintf(pass, "%d", password);
+	if (sizecheck(pass, r) == 1)
+	{
+		//Size does not reach limit. Proceed to concat
+		strcpy(H2_notsigned, pass);
+		strcat(H2_notsigned, r);
+		struct tcpquery query = signed_withSHA(H2_notsigned);
+		strncpy(H2, query.command, sizeof(H2));
+		result = 1;
+	}
+	return result;
 }
 
 int H_value_compare(struct tcpquery * buffer)
@@ -192,22 +214,7 @@ int H_value_compare(struct tcpquery * buffer)
 	return result;
 }
 
-int  generateH2value(int new_sock, int password, int R)
-{
-	int result = 0;
-	char r[255];
-	char pass[3];
-	sprintf(r, "%d", R);
-	sprintf(pass, "%d", password);
-	if (sizecheck(pass, r) == 1)
-	{
-		//Size does not reach limit. Proceed to concat
-		strcpy(H2, pass);
-		strcat(H2, r);
-		result = 1;
-	}
-	return result;
-}
+
 
 int sizecheck(char array1[], char array2[])
 {
@@ -220,19 +227,3 @@ int sizecheck(char array1[], char array2[])
 }
 
 
-char * generateSHA(SHA256_CTX c, char * input, size_t len)
-{
-	char * hash = (char *) malloc(32);
-	if (!SHA256_Init(&c))
-	{
-		hash = NULL;
-	}
-	if (!SHA256_Update(&c, input, len))
-	{
-		hash = NULL;
-	}
-	if (!SHA256_Final(hash, &c)) {
-		hash = NULL;
-	}
-	return hash;
-}

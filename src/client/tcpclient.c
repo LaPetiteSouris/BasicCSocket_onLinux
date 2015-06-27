@@ -8,6 +8,7 @@
 #include "tcpclient.h"
 #include <stdio.h>
 #include "../serialization/tcp_query_packet.h"
+
 char * prompt_and_read(char * prompt) {
 	char * response;
 	char * bufsize;
@@ -52,6 +53,7 @@ int startTCPClient()
 		{
 			printf("Connection to server failed");
 			result = 0;
+			exit(1);
 		}
 		else
 		{
@@ -71,17 +73,19 @@ int startTCPClient()
 				if (n < 0)
 				{
 					printf("Connection to server failed");
+					exit(1);
 					result = 0;
 				} else
 				{
-					
+
 					struct tcpquery incoming = deserialization_tcp(buff_recv);
 					int r = verify_tcp_packet(&incoming);
 					if (r == 1)
 					{	//Check servr response if username exists
 						int userexist = strcmp(incoming.command, "0");
 						if (userexist == 0) {
-							printf("Username does not exist.");
+							printf("Username does not exist.\n");
+							break;
 						}
 						else
 						{
@@ -94,13 +98,13 @@ int startTCPClient()
 							char * pass = prompt_and_read("Please enter your password: ");
 							char p2[255];
 							strncpy(p2, pass, 255);
-							char H2[255];
+							char H1[255];
 							if (sizecheck(p2, R) == 1)
 							{
-								strcpy(H2, p2);
-								strcat(H2, R);
-								query = pack_tcp_data(H2);
-								buf = serialization_tcp(query);
+								strcpy(H1, p2);
+								strcat(H1, R);
+								struct tcpquery hash = signed_withSHA(H1);
+								buf = serialization_tcp(hash);
 								send(socket_fd, buf, sizeof(*buf), 0);
 								free(buf);
 								break;
