@@ -6,7 +6,7 @@ struct tcpquery
 	char str[11];
 	int len;
 	char mode;
-	char command[256];
+	char command[255];
 };
 struct tcpquery pack_tcp_data(char msg[255]);
 /*** Function to serialize data before sending

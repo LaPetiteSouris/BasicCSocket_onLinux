@@ -28,10 +28,14 @@ struct udpquery * serialization_udp(struct udpquery data)
 }
 struct udpquery deserialization_udp(struct udpquery * ptr)
 {
-	struct udpquery * buff = (struct udpquery *)malloc(sizeof(struct udpquery));
 	struct udpquery incoming;
-	memcpy(&incoming, buff, sizeof(struct udpquery));
-	free(buff);
+	if (sizeof(incoming) == sizeof(*ptr)) {
+		memcpy(&incoming, ptr, sizeof(struct udpquery));
+	} else
+	{
+		printf("Undefined Behavior");
+	}
+	free(ptr);
 	return incoming;
 }
 int verify_udp_packet(struct udpquery * ptr)
