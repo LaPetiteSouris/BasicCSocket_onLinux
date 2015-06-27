@@ -9,13 +9,13 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <time.h>
-#include "../serialization/tcp_query_packet.h"
-
+//This is the H2 value, generate by server for client verification
+char H2[255];
+//This is random token generate by server.
+int R;
 int32_t random1_6() {
 	return ((rand() % 6) + 1);
 }
-
-
 
 int start_TCP_socket()
 {
@@ -66,106 +66,61 @@ int start_TCP_socket()
 					int n = recv(new_sock, buffer, sizeof(*buffer), 0 );
 					if (n < 0)
 					{
+						printf("Data receiving from socket failed. Exit.\n");
 						exit(1);
 					} else if (n == 0)
 					{
-						printf("Connection closed\n");
+						printf("Connection error or closed\n");
 						break;
 					}
-					//Deserialize data
 					struct tcpquery incoming = deserialization_tcp(buffer);
-					int verification = verify_tcp_packet(&incoming);
-					//printf("%d\n", verification);
-					if (verification == 1)
+					if (verify_tcp_packet(&incoming) == 1)
 					{
 						int password = getpassword(incoming.command);
 						if (password != 0)
 						{
-							//Username exists.
-							//Create a random number
-							int R = random1_6();
-							char r[255];
-							char pass[3];
-							char H1[255];
-							sprintf(r, "%d", R);
-							sprintf(pass, "%d", password);
-							struct tcpquery query = pack_tcp_data(r);
-							//Serialize response
-							buffer = serialization_tcp(query);
-							//TO-Do Calculate P1+R1=>H2 value
-							if (sizecheck(pass, r) == 1)
+							if (randomtokenhandling(new_sock) < 0)
 							{
-								//Size does not reach limit. Proceed to concat
-								strcpy(H1, pass);
-								strcat(H1, r);
-								//Response
-								n = send(new_sock, buffer, sizeof(*buffer), 0);
-								if (n < 0)
+								printf("Socket writing error.\n");
+								exit(1);
+							}
+							int n = recv(new_sock, buffer2, sizeof(*buffer2), 0);
+							if (n < 0)
+							{
+								printf("Data receiving from socket failed. Exit.\n");
+								exit(1);
+							} else if (n == 0)
+							{
+								printf("Connection closed\n");
+								break;
+							}
+							if (generateH2value(new_sock, password, R))
+							{
+								if (H_value_compare(buffer2))
 								{
-									printf("Error writing socket");
-									result = 0;
-								} else
-								{
-									//Receive H1 from client
-									int size = 1;
-									size = recv(new_sock, buffer2, sizeof(*buffer2), 0);
-									close(new_sock);
-									//TODO This is a break point
-									//break;
-									if (size < 1)
-									{
-									} else {
-										close(new_sock);
-										struct tcpquery incoming2 = deserialization_tcp(buffer2);
-										int verification2 = verify_tcp_packet(&incoming2);
-										if (verification2 == 1)
-										{
-											printf("verified.");
-											//break;
-											/*char H2[255];
-											strcpy(H2, incoming2.command);
-											//TO-DOCompare H1 with H2
-											int cmp = strcmp(H1, H2);
-											if (cmp == 0)
-											{
-												result = 1;
-												printf("Authorization completed");
-											} else {
-												result = 0;
-												printf("Authorization failed");
-											}*/
-
-										} else
-										{
-											printf("Packet received did not follow defined protocol. Rejected. \n");
-											break;
-										}
-									}
+									printf("Authorization completed. Success...\n");
 								}
+								else
+								{
+									printf("Authorization Failed\n");
+								}
+							} else {
+								printf("Cannot generate authetication token\n");
 							}
-							else
-							{	result = 0;
-								printf("Password and random string key size exceed transmission limit 255 character.");
-							}
+
 						} else
 						{
-							int R = 0;
-							char r[255];
-							sprintf(r, "%d", R);
-							struct tcpquery query = pack_tcp_data(r);
-							//Serialize response
-							buffer = serialization_tcp(query);
-							//Response
-							n = send(new_sock, buffer, sizeof(*buffer), 0);
+							//User not found. Reject connection.
+							printf("User not found. Rejected...\n");
+							rejectconnection(new_sock);
+							break;
 						}
-					} else //if (verification == 1)
+
+					} else
 					{
-						//result = 0;
 						printf("Packet received did not follow defined protocol. Rejected. \n");
 						break;
 					}
-
-
 				}
 				close(new_sock);
 			}
@@ -184,6 +139,72 @@ int getpassword(char username[255])
 	if (compare_result != 0)
 	{
 		result = 0;
+	}
+	return result;
+}
+
+
+void rejectconnection(int new_sock)
+{
+	int R = 0;
+	char r[255];
+	sprintf(r, "%d", R);
+	struct tcpquery query = pack_tcp_data(r);
+	//Serialize response
+	struct tcpquery *buffer = serialization_tcp(query);
+	//Response
+	send(new_sock, buffer, sizeof(*buffer), 0);
+}
+
+int randomtokenhandling(int new_sock)
+{
+	R = random1_6();
+	char r[255];
+	char pass[3];
+	char H1[255];
+	sprintf(r, "%d", R);
+	struct tcpquery query = pack_tcp_data(r);
+	struct tcpquery *buffer = serialization_tcp(query);
+	int n = send(new_sock, buffer, sizeof(*buffer), 0);
+	return n;
+
+}
+
+int H_value_compare(struct tcpquery * buffer)
+{
+	int result = 0;
+	struct tcpquery incoming2 = deserialization_tcp(buffer);
+	int verification2 = verify_tcp_packet(&incoming2);
+	if (verification2 == 1)
+	{
+		//break;
+		char H1[255];
+		strcpy(H1, incoming2.command);
+		//TO-DOCompare H1 with H2
+		int cmp = strcmp(H1, H2);
+		if (cmp == 0)
+		{	result = 1;
+		}
+	} else
+	{
+		printf("Packet received did not follow defined protocol. Rejected. \n");
+	}
+	return result;
+}
+
+int  generateH2value(int new_sock, int password, int R)
+{
+	int result = 0;
+	char r[255];
+	char pass[3];
+	sprintf(r, "%d", R);
+	sprintf(pass, "%d", password);
+	if (sizecheck(pass, r) == 1)
+	{
+		//Size does not reach limit. Proceed to concat
+		strcpy(H2, pass);
+		strcat(H2, r);
+		result = 1;
 	}
 	return result;
 }
@@ -215,31 +236,3 @@ char * generateSHA(SHA256_CTX c, char * input, size_t len)
 	}
 	return hash;
 }
-/*
-int verifyH1(struct tcpquery *buffer2)
-{
-	printf("%d\n", buffer2);
-	printf("Receiving data from client\n");
-	struct tcpquery incoming2 = deserialization_tcp(buffer);
-	int verification2 = verify_tcp_packet(&incoming2);
-	if (verification2 == 1)
-	{
-		char H2[255];
-		strcpy(H2, incoming2.command);
-		//TO-DOCompare H1 with H2
-		int cmp = strcmp(H1, H2);
-		if (cmp == 0)
-		{
-			result = 1;
-			printf("Authorization completed");
-		} else {
-			result = 0;
-			printf("Authorization failed");
-		}
-
-	} else
-	{
-		result = 0;
-	}
-}
-*/

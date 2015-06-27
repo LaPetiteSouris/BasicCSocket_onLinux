@@ -11,7 +11,6 @@ struct tcpquery pack_tcp_data(char msg[255])
 
 struct tcpquery * serialization_tcp(struct tcpquery data)
 {
-	printf("Serialization data...\n");
 	struct tcpquery * buf = (struct tcpquery *)malloc(sizeof(struct tcpquery));
 	memcpy(buf, &data, sizeof(struct tcpquery));
 	return buf;
@@ -21,7 +20,6 @@ struct tcpquery deserialization_tcp(struct tcpquery * ptr)
 
 	struct tcpquery incoming;
 	if (sizeof(incoming) == sizeof(*ptr)) {
-		printf("Deserialization data...\n");
 		memcpy(&incoming, ptr, sizeof(struct tcpquery));
 	} else
 	{
@@ -38,7 +36,7 @@ int verify_tcp_packet(struct tcpquery * ptr)
 	        || sizeof(ptr -> str) != 11 )
 	{
 		result = -1;
-		printf("Verification failed\n");
+		printf("Protocol verification failed\n");
 	}
 	return result;
 

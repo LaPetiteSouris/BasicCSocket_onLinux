@@ -74,6 +74,7 @@ int startTCPClient()
 					result = 0;
 				} else
 				{
+					
 					struct tcpquery incoming = deserialization_tcp(buff_recv);
 					int r = verify_tcp_packet(&incoming);
 					if (r == 1)
