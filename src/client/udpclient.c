@@ -13,20 +13,9 @@
 int32_t random1_6() {
 	return ((rand() % 6) + 1);
 }
-struct udpquery packdata()
-{
-	//Declare query packet frame here.
-	char s[5] = "Ping";
-	srand(time(NULL));
-	int32_t sid = random1_6();
-	int32_t tid = random1_6();
-	struct udpquery data = {'D', 'S', 4, sid, tid, 5, "any"};
-	strncpy(data.msg, s, sizeof(data.msg));
-	return data;
 
-}
 
-int startUDPClient()
+int startUDPClient( char key[255])
 {
 	int result = 0;
 //Open a client socket
@@ -62,7 +51,7 @@ int startUDPClient()
 				//Serialization
 				struct udpquery * buf = (struct udpquery *)malloc(sizeof(struct udpquery));
 				struct udpquery query;
-				query = packdata();
+				query = pack_udp_data(key);
 				memcpy(buf, &query, sizeof(struct udpquery));
 				//Send ping message to server
 				socklen_t server_addr_len = sizeof(server_address);

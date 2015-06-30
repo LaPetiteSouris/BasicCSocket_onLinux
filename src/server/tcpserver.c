@@ -15,13 +15,15 @@ char H2_notsigned[255];
 char H2[255];
 //This is random token generate by server.
 int R;
+//If Auth completed,  break the Auth process.
+int breaking_signal = 1;
 int32_t random1_6() {
 	return ((rand() % 6) + 1);
 }
 
-int start_TCP_socket()
-{
-	int result = 0;
+int  start_TCP_socket()
+{	int result = 0;
+	//res = "failed";
 	int port = 8080;
 	int socket_fd;
 	struct sockaddr_in server_address;
@@ -32,7 +34,6 @@ int start_TCP_socket()
 	if (socket_fd < 0)
 	{
 		printf("Error in creating socket");
-
 	} else
 	{
 		//Declare socket address
@@ -51,9 +52,9 @@ int start_TCP_socket()
 			socklen_t peer_addr_len = sizeof(peer_addr);
 			listen(socket_fd, 5);
 			//Allocate space for the buffer server is about to receive
-			struct tcpquery * buffer = (struct tcpquery *) malloc(sizeof(struct tcpquery));
-			struct tcpquery * buffer2 = (struct tcpquery *) malloc(sizeof(struct tcpquery));
-			for (;;)
+			struct tcpquery * buffer = malloc(sizeof(struct tcpquery));
+			struct tcpquery * buffer2 = malloc(sizeof(struct tcpquery));
+			while (breaking_signal)
 			{
 				//Accept connection
 				int new_sock = accept(socket_fd, (struct sockaddr *) &peer_addr, &peer_addr_len );
@@ -102,14 +103,19 @@ int start_TCP_socket()
 								{
 									printf("Authentication completed. Success...\n");
 									auth_client(new_sock, 1);
+									breaking_signal = 0;
+									result = 1;
+									break;
 								}
 								else
 								{
 									printf("Authentication Failed\n");
 									auth_client(new_sock, 0);
+									break;
 								}
 							} else {
 								printf("Cannot generate authetication token\n");
+								break;
 							}
 
 						} else
@@ -126,8 +132,10 @@ int start_TCP_socket()
 						break;
 					}
 				}
+
 				close(new_sock);
 			}
+			close(socket_fd);
 
 		}
 
@@ -249,3 +257,13 @@ void auth_client(int new_sock, int i)
 	}
 }
 
+char * getHkey()
+{
+	char * res = malloc(255);
+	int i;
+	for (i = 0; i < 255; ++i)
+	{
+		res[i] = H2[i];
+	}
+	return res;
+}

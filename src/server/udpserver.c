@@ -7,7 +7,9 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
-int start_UDP()
+#include "../serialization/udp_query_packet.h"
+
+int start_UDP(char key[255])
 {	int result = 0;
 	int port = 8080;
 	int socket_fd;
@@ -47,16 +49,17 @@ int start_UDP()
 					int packet_verification = verify_udp_packet(&incoming);
 					if (packet_verification == 1)
 					{
-						printf("Query follows defined protocol. Accepted. Request content is:  \n");
-						printf("%s\n\n", incoming.msg);
+						printf("Query follows defined protocol. Accepted \n");
+						//TODO: HMAC Integrity check
+						int integrity_check=verify_hmac(incoming, key);
+						printf("%d\n\n", integrity_check);
+						break;
 					}
 					else if (packet_verification == 0)
 					{
 						printf("Client query does not follow protocol. Rejected. \n\n");
+						break;
 					}
-					//Echo back
-					//sendto(socket_fd, buff, buff_size, 0, &client_address, client_addr_len);
-					//buff[255] = '\0';
 				}
 			}
 		} else

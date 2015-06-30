@@ -8,7 +8,8 @@
 #include "tcpclient.h"
 #include <stdio.h>
 #include "../serialization/tcp_query_packet.h"
-
+//H1 verificatino value
+char H1[255];
 char * prompt_and_read(char * prompt) {
 	char * response;
 	char * bufsize;
@@ -24,7 +25,7 @@ char * prompt_and_read(char * prompt) {
 	return response;
 }
 
-int startTCPClient()
+int  startTCPClient()
 {	int result = 0;
 	//Open a client socket
 	int socket_fd;
@@ -52,7 +53,6 @@ int startTCPClient()
 		if (n < 0)
 		{
 			printf("Connection to server failed");
-			result = 0;
 			exit(1);
 		}
 		else
@@ -127,12 +127,8 @@ int startTCPClient()
 	else
 	{
 		printf("Connection to server failed");
-		result = 0;
-
 	}
-
 	return result;
-
 }
 
 int authenciation(int socket, char * pass, char R[])
@@ -140,7 +136,6 @@ int authenciation(int socket, char * pass, char R[])
 	int result = 0;
 	char p2[255];
 	strncpy(p2, pass, 255);
-	char H1[255];
 	if (sizecheck(p2, R) == 1)
 	{
 		strcpy(H1, p2);
@@ -182,6 +177,16 @@ int check_auth_result(struct tcpquery * buff)
 		printf("Packet received did not follow defined protocol. Rejected. \n");
 
 	}
-
 	return r;
+}
+
+char * getH1Key()
+{
+	char * res = malloc(255);
+	int i;
+	for (i = 0; i < 255; ++i)
+	{
+		res[i] = H1[i];
+	}
+	return res;
 }

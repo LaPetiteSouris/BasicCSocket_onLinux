@@ -12,7 +12,7 @@ struct tcpquery pack_tcp_data(char msg[255])
 
 struct tcpquery * serialization_tcp(struct tcpquery data)
 {
-	struct tcpquery * buf = (struct tcpquery *)malloc(sizeof(struct tcpquery));
+	struct tcpquery * buf = malloc(sizeof(struct tcpquery));
 	memcpy(buf, &data, sizeof(struct tcpquery));
 	return buf;
 }
