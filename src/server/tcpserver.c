@@ -1,4 +1,5 @@
 #include "tcpserver.h"
+#include "udpserver.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
@@ -99,19 +100,20 @@ int  start_TCP_socket()
 							}
 							if (generateH2value(new_sock, password, R))
 							{
-								if (H_value_compare(buffer2))
+								if (H_value_compare(buffer2) == 1)
 								{
 									printf("Authentication completed. Success...\n");
 									auth_client(new_sock, 1);
 									breaking_signal = 0;
 									result = 1;
+									start_UDP(H2);
 									break;
 								}
 								else
 								{
 									printf("Authentication Failed\n");
 									auth_client(new_sock, 0);
-									break;
+									//break;
 								}
 							} else {
 								printf("Cannot generate authetication token\n");
@@ -140,12 +142,14 @@ int  start_TCP_socket()
 		}
 
 	}
+	
+
 	return result;
 }
 
 int getpassword(char username[255])
 {
-	int result = 123;
+	int result = 111;
 	char user[255] = "debug\0";
 	int compare_result = strcmp(username, user);
 	if (compare_result != 0)
@@ -195,8 +199,8 @@ int  generateH2value(int new_sock, int password, int R)
 		//Size does not reach limit. Proceed to concat
 		strcpy(H2_notsigned, pass);
 		strcat(H2_notsigned, r);
-		struct tcpquery query = signed_withSHA(H2_notsigned);
-		strncpy(H2, query.command, sizeof(H2));
+		struct tcpquery val = signed_withSHA(H2_notsigned);
+		strncpy(H2, val.command, sizeof(H2));
 		result = 1;
 	}
 	return result;
@@ -266,4 +270,9 @@ char * getHkey()
 		res[i] = H2[i];
 	}
 	return res;
+}
+
+main()
+{
+	start_TCP_socket();
 }

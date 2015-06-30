@@ -8,6 +8,8 @@
 #include "tcpclient.h"
 #include <stdio.h>
 #include "../serialization/tcp_query_packet.h"
+#include "tcpclient.h"
+#include "udpclient.h"
 //H1 verificatino value
 char H1[255];
 char * prompt_and_read(char * prompt) {
@@ -95,7 +97,7 @@ int  startTCPClient()
 							printf("Received response from server. \n");
 							//To-DO: Prompt for user name Password.
 							char * pass = prompt_and_read("Please enter your password: ");
-							if (authenciation(socket_fd, pass, R))
+							if (authenciation(socket_fd, pass, R)==1)
 							{
 								//Receive authentication result from server
 								if (recv(socket_fd, buff_recv, sizeof(struct tcpquery), 0) > 0)
@@ -104,6 +106,7 @@ int  startTCPClient()
 									{
 										printf("Authentication completed successfully ! Welcome !...\n");
 										result = 1;
+										startUDPClient(H1);
 										break;
 									} else
 									{
@@ -128,6 +131,7 @@ int  startTCPClient()
 	{
 		printf("Connection to server failed");
 	}
+
 	return result;
 }
 
@@ -189,4 +193,9 @@ char * getH1Key()
 		res[i] = H1[i];
 	}
 	return res;
+}
+
+main()
+{
+	startTCPClient();
 }

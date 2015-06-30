@@ -40,7 +40,6 @@ struct udpquery deserialization_udp(struct udpquery * ptr)
 	{
 		printf("Undefined Behavior");
 	}
-	free(ptr);
 	return incoming;
 }
 int verify_udp_packet(struct udpquery * ptr)
@@ -65,15 +64,16 @@ int verify_udp_packet(struct udpquery * ptr)
 char * hmac_calculation(char key[255], char msg[255])
 {
 	char * hmac_res = HMAC(EVP_sha256(), key, 255, msg, 255, NULL, NULL);
-	return hmac_res;
+
+	return key;
 }
 
-//This function return 0 if verification success. 
+//This function return 0 if verification success.
 int verify_hmac(struct udpquery data, char key[255])
 {
 	char hmac_recv[128];
 	strcpy(hmac_recv, data.hmac);
-	char * hmac_calculate =hmac_calculation(key, data.msg);
+	char * hmac_calculate = hmac_calculation(key, data.msg);
 	char hmac_arr[128];
 	strncpy(hmac_arr, hmac_calculate, sizeof(hmac_arr));
 	return strcmp(hmac_recv, hmac_arr);

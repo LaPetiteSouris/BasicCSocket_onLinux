@@ -12,7 +12,7 @@ struct udpquery
 	//Messag is 255 byte max
 	char msg[255];
 	int hmac_len;
-	char  hmac[128];
+	char  hmac[255];
 
 };
 struct udpquery pack_udp_data(char key[255]);

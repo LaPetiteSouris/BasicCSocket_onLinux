@@ -49,10 +49,10 @@ int start_UDP(char key[255])
 					int packet_verification = verify_udp_packet(&incoming);
 					if (packet_verification == 1)
 					{
-						printf("Query follows defined protocol. Accepted \n");
+						printf("Query follows defined protocol. Accepted. \n");
 						//TODO: HMAC Integrity check
 						int integrity_check=verify_hmac(incoming, key);
-						printf("%d\n\n", integrity_check);
+						printf("%d\n", integrity_check);
 						break;
 					}
 					else if (packet_verification == 0)
