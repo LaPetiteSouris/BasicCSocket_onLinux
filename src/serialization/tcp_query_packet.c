@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <openssl/sha.h>
-struct tcpquery pack_tcp_data(char msg[255])
+struct tcpquery pack_tcp_data(char msg[])
 {
-	struct tcpquery data = {"DISTRIB2015", 255, 'D', "any"};
-	strncpy(data.command, msg, sizeof(data.command));
+	struct tcpquery data = {"DISTRIB2015", sizeof(struct tcpquery), 'D',""};
+	strcpy(data.command, msg);
 	return data;
 }
 
@@ -33,7 +33,7 @@ int verify_tcp_packet(struct tcpquery * ptr)
 {
 	int result = 1;
 	if (sizeof(ptr->len) > 4 || sizeof(ptr->mode) != 1
-	        || sizeof(ptr->command) != (ptr->len)
+	        || sizeof(*ptr) != (ptr->len)
 	        || sizeof(ptr -> str) != 11 )
 	{
 		result = -1;
@@ -42,12 +42,14 @@ int verify_tcp_packet(struct tcpquery * ptr)
 	return result;
 
 }
+//TODO: SHA256-signed value must be converted to HEX before trasmission. Never
+//transmit raw binary
 
 struct tcpquery signed_withSHA(char input[])
 {
 	SHA256_CTX c;
-	char * hash = (char *) malloc(255);
-	char hash_arr[255];
+	char * hash = (char *) malloc(32);
+	char hash_arr[32];
 	if (!SHA256_Init(&c))
 	{
 		hash = NULL;
@@ -60,6 +62,7 @@ struct tcpquery signed_withSHA(char input[])
 		hash = NULL;
 	}
 	strncpy(hash_arr, hash, sizeof(hash_arr));
-	struct tcpquery query = pack_tcp_data(hash_arr);
+	//struct tcpquery query = pack_tcp_data(hash_arr);
+	struct tcpquery query = pack_tcp_data(input);
 	return query;
 }
