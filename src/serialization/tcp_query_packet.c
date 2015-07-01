@@ -49,13 +49,11 @@ struct tcpquery signed_withSHA(char input[])
 {
 	char hash[32];
 	SHA256(input, strlen(input), hash);
-	printf("%s\n", "Printing formated-data");
 	int i;
 	char out[97];
 	for (i = 0; i < 32; i++) {
 		snprintf(out + i * 3, 4, "%02x ", hash[i]);
 	}
-	printf("%s\n", out);
 	struct tcpquery query = pack_tcp_data(out);
 	return query;
 }

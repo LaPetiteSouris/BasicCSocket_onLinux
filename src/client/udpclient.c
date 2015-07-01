@@ -48,16 +48,32 @@ int startUDPClient( char key[255])
 			server_address.sin_port = htons(port);
 			if (inet_pton(AF_INET, IP, &server_address.sin_addr.s_addr))
 			{
+				struct udpquery query = pack_udp_data(key);
 				//Serialization
-				struct udpquery * buf = (struct udpquery *)malloc(sizeof(struct udpquery));
-				struct udpquery query;
-				query = pack_udp_data(key);
-				memcpy(buf, &query, sizeof(struct udpquery));
+				struct udpquery * buf = serialization_udp(query);
 				//Send ping message to server
 				socklen_t server_addr_len = sizeof(server_address);
 				sendto(socket_fd, buf, sizeof(*buf), 0, (struct sockaddr *)&server_address, server_addr_len);
-				free(buf);
 
+				int message_size = recvfrom(socket_fd, buf, sizeof(*buf) , 0, NULL, NULL );
+				//Receive UDP server response
+				query = deserialization_udp(buf);
+				int packet_verification = verify_udp_packet(&query);
+				if (packet_verification == 1)
+				{
+					printf("Query follows defined protocol. Accepted. \n");
+					//TODO: HMAC Integrity check
+					int integrity_check = verify_hmac(query, key);
+					if (integrity_check == 0)
+					{
+						printf("%s\n", query.msg);
+					}
+
+				}
+				else if (packet_verification == 0)
+				{
+					printf("Client query does not follow protocol. Rejected. \n\n");
+				}
 			}
 
 		}

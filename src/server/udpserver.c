@@ -1,6 +1,5 @@
 #include "udpserver.h"
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <netinet/in.h>
@@ -45,14 +44,14 @@ int start_UDP(char key[255])
 				if (message_size > 0 && sizeof(*buff) == sizeof(incoming))
 				{
 					//De-serialization
-					memcpy(&incoming, buff, sizeof(struct udpquery));
+					incoming = deserialization_udp(buff);
 					int packet_verification = verify_udp_packet(&incoming);
 					if (packet_verification == 1)
 					{
 						printf("Query follows defined protocol. Accepted. \n");
 						//TODO: HMAC Integrity check
-						int integrity_check=verify_hmac(incoming, key);
-						printf("%d\n", integrity_check);
+						int integrity_check = verify_hmac(incoming, key);
+						response_to_client(integrity_check, key, socket_fd, client_address);
 						break;
 					}
 					else if (packet_verification == 0)
@@ -68,6 +67,19 @@ int start_UDP(char key[255])
 		}
 	}
 	return result;
+}
+
+void response_to_client(int result, char key[], int socket_fd, struct sockaddr client_address)
+{
+	if (result == 0)
+	{
+		printf("%s\n", "Pinging client");
+		struct udpquery query = pack_udp_data(key);
+		//Serialization
+		struct udpquery * buf = serialization_udp(query);
+		//Send ping message to server
+		sendto(socket_fd, buf, sizeof(*buf), 0, (struct sockaddr *)&client_address, sizeof(client_address));
+	}
 }
 
 
