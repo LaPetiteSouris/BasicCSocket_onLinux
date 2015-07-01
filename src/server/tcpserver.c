@@ -217,7 +217,7 @@ int H_value_compare(struct tcpquery * buffer)
 		char H1[255];
 		strcpy(H1, incoming2.command);
 		//TO-DOCompare H1 with H2
-		int cmp = memcmp(H1, H2, strlen(H1));
+		int cmp = strncmp(H1, H2, strlen(H1));
 		if (cmp == 0)
 		{	result = 1;
 		}

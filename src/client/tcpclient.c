@@ -97,7 +97,7 @@ int  startTCPClient()
 							printf("Received response from server. \n");
 							//To-DO: Prompt for user name Password.
 							char * pass = prompt_and_read("Please enter your password: ");
-							if (authenciation(socket_fd, pass, R)==1)
+							if (authenciation(socket_fd, pass, R) == 1)
 							{
 								//Receive authentication result from server
 								if (recv(socket_fd, buff_recv, sizeof(struct tcpquery), 0) > 0)
@@ -145,6 +145,7 @@ int authenciation(int socket, char * pass, char R[])
 		strcpy(H1, p2);
 		strcat(H1, R);
 		struct tcpquery hash = signed_withSHA(H1);
+		strncpy(H1, hash.command, sizeof(H1));
 		struct tcpquery * buf = serialization_tcp(hash);
 		send(socket, buf, sizeof(*buf), 0);
 		result = 1;

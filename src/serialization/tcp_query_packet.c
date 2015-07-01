@@ -5,7 +5,7 @@
 #include <openssl/sha.h>
 struct tcpquery pack_tcp_data(char msg[])
 {
-	struct tcpquery data = {"DISTRIB2015", sizeof(struct tcpquery), 'D',""};
+	struct tcpquery data = {"DISTRIB2015", sizeof(struct tcpquery), 'D', ""};
 	strcpy(data.command, msg);
 	return data;
 }
@@ -47,22 +47,15 @@ int verify_tcp_packet(struct tcpquery * ptr)
 
 struct tcpquery signed_withSHA(char input[])
 {
-	SHA256_CTX c;
-	char * hash = (char *) malloc(32);
-	char hash_arr[32];
-	if (!SHA256_Init(&c))
-	{
-		hash = NULL;
+	char hash[32];
+	SHA256(input, strlen(input), hash);
+	printf("%s\n", "Printing formated-data");
+	int i;
+	char out[97];
+	for (i = 0; i < 32; i++) {
+		snprintf(out + i * 3, 4, "%02x ", hash[i]);
 	}
-	if (!SHA256_Update(&c, input, strlen(input)))
-	{
-		hash = NULL;
-	}
-	if (!SHA256_Final(hash, &c)) {
-		hash = NULL;
-	}
-	strncpy(hash_arr, hash, sizeof(hash_arr));
-	//struct tcpquery query = pack_tcp_data(hash_arr);
-	struct tcpquery query = pack_tcp_data(input);
+	printf("%s\n", out);
+	struct tcpquery query = pack_tcp_data(out);
 	return query;
 }

@@ -76,5 +76,6 @@ int verify_hmac(struct udpquery data, char key[255])
 	char * hmac_calculate = hmac_calculation(key, data.msg);
 	char hmac_arr[128];
 	strncpy(hmac_arr, hmac_calculate, sizeof(hmac_arr));
-	return memcmp(hmac_recv, hmac_arr,strlen(hmac_recv));
+	printf("%s\n","Start verification.");
+	return strncmp(hmac_recv, hmac_arr,strlen(hmac_recv));
 }
