@@ -24,13 +24,19 @@ struct udpquery pack_udp_data(char key[255])
 	return data;
 
 }
-
+/***
+Serialize data before sending to socket. Allocated buffer must be released
+manually after usage
+***/
 struct udpquery * serialization_udp(struct udpquery data)
 {
 	struct udpquery * buf = (struct udpquery *)malloc(sizeof(struct udpquery));
 	memcpy(buf, &data, sizeof(struct udpquery));
 	return buf;
 }
+/***
+Serialize data before sending to socket. 
+***/
 struct udpquery deserialization_udp(struct udpquery * ptr)
 {
 	struct udpquery incoming;

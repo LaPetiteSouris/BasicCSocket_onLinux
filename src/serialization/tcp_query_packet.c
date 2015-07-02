@@ -9,13 +9,19 @@ struct tcpquery pack_tcp_data(char msg[])
 	strcpy(data.command, msg);
 	return data;
 }
-
+/***
+Serialize data before sending to socket. Allocated buffer must be released
+manually after usage
+***/
 struct tcpquery * serialization_tcp(struct tcpquery data)
 {
 	struct tcpquery * buf = malloc(sizeof(struct tcpquery));
 	memcpy(buf, &data, sizeof(struct tcpquery));
 	return buf;
 }
+/***
+De-serialize data before sending to socket.
+***/
 struct tcpquery deserialization_tcp(struct tcpquery * ptr)
 {
 

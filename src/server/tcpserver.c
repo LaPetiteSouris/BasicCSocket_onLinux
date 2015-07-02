@@ -78,6 +78,8 @@ int  start_TCP_socket()
 						break;
 					}
 					struct tcpquery incoming = deserialization_tcp(buffer);
+					//Free allocated buffer received
+					free(buffer);
 					if (verify_tcp_packet(&incoming) == 1)
 					{
 						int password = getpassword(incoming.command);
@@ -142,7 +144,7 @@ int  start_TCP_socket()
 		}
 
 	}
-	
+
 
 	return result;
 }
@@ -170,6 +172,7 @@ void rejectconnection(int new_sock)
 	struct tcpquery *buffer = serialization_tcp(query);
 	//Response
 	send(new_sock, buffer, sizeof(*buffer), 0);
+	free(buffer);
 }
 
 
@@ -183,6 +186,7 @@ int randomtokenhandling(int new_sock)
 	struct tcpquery query = pack_tcp_data(r);
 	struct tcpquery *buffer = serialization_tcp(query);
 	int n = send(new_sock, buffer, sizeof(*buffer), 0);
+	free(buffer);
 	return n;
 
 }
@@ -225,6 +229,8 @@ int H_value_compare(struct tcpquery * buffer)
 	{
 		printf("Packet received did not follow defined protocol. Rejected. \n");
 	}
+	//Release allocated buffer received. (buffer2)
+	free(buffer);
 	return result;
 }
 
@@ -250,6 +256,7 @@ void auth_client(int new_sock, int i)
 		struct tcpquery *buffer = serialization_tcp(query);
 		//Response
 		send(new_sock, buffer, sizeof(*buffer), 0);
+		free(buffer);
 	}
 	else
 	{
@@ -258,19 +265,10 @@ void auth_client(int new_sock, int i)
 		struct tcpquery *buffer = serialization_tcp(query);
 		//Response
 		send(new_sock, buffer, sizeof(*buffer), 0);
+		free(buffer);
 	}
 }
 
-char * getHkey()
-{
-	char * res = malloc(255);
-	int i;
-	for (i = 0; i < 255; ++i)
-	{
-		res[i] = H2[i];
-	}
-	return res;
-}
 
 main()
 {

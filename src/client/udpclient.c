@@ -58,6 +58,8 @@ int startUDPClient( char key[255])
 				int message_size = recvfrom(socket_fd, buf, sizeof(*buf) , 0, NULL, NULL );
 				//Receive UDP server response
 				query = deserialization_udp(buf);
+				//Free allocated space which stored buffer data
+				free(buf);
 				int packet_verification = verify_udp_packet(&query);
 				if (packet_verification == 1)
 				{
@@ -65,7 +67,7 @@ int startUDPClient( char key[255])
 					//TODO: HMAC Integrity check
 					int integrity_check = verify_hmac(query, key);
 					if (integrity_check == 0)
-					{
+					{	printf("%s\n", "Server responed: ");
 						printf("%s\n", query.msg);
 					}
 

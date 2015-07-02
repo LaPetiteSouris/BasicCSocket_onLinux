@@ -35,7 +35,7 @@ int start_UDP(char key[255])
 		{
 			struct sockaddr client_address;
 			client_addr_len = sizeof(client_address);
-			//Allocate space before deserialization
+			//Allocate space to receive buffer data
 			struct udpquery * buff = (struct udpquery *)malloc(sizeof(struct udpquery));
 			struct udpquery incoming;
 			for (;;) {
@@ -45,6 +45,8 @@ int start_UDP(char key[255])
 				{
 					//De-serialization
 					incoming = deserialization_udp(buff);
+					//Free allocated space storing received buffer data
+					free(buff);
 					int packet_verification = verify_udp_packet(&incoming);
 					if (packet_verification == 1)
 					{
@@ -73,12 +75,13 @@ void response_to_client(int result, char key[], int socket_fd, struct sockaddr c
 {
 	if (result == 0)
 	{
-		printf("%s\n", "Pinging client");
+		printf("%s\n", "Sent ping to client.");
 		struct udpquery query = pack_udp_data(key);
 		//Serialization
 		struct udpquery * buf = serialization_udp(query);
 		//Send ping message to server
 		sendto(socket_fd, buf, sizeof(*buf), 0, (struct sockaddr *)&client_address, sizeof(client_address));
+		free(buf);
 	}
 }
 

@@ -69,6 +69,7 @@ int  startTCPClient()
 				//Connection established. Start sending data to TCP server
 				printf("Sending data\n");
 				send(socket_fd, buf, sizeof(*buf), 0);
+				free(buf);
 				//Receving response from server
 				struct tcpquery * buff_recv = (struct tcpquery *) malloc(sizeof(struct tcpquery));
 				int n = recv(socket_fd, buff_recv, sizeof(struct tcpquery), 0);
@@ -104,6 +105,7 @@ int  startTCPClient()
 								{
 									if (check_auth_result(buff_recv))
 									{
+
 										printf("Authentication completed successfully ! Welcome !...\n");
 										result = 1;
 										startUDPClient(H1);
@@ -113,6 +115,7 @@ int  startTCPClient()
 										printf("Authentication failed ! Connection terminated for security reason.\n");
 										break;
 									}
+									free(buff_recv);
 
 								} else
 								{
@@ -148,6 +151,7 @@ int authenciation(int socket, char * pass, char R[])
 		strncpy(H1, hash.command, sizeof(H1));
 		struct tcpquery * buf = serialization_tcp(hash);
 		send(socket, buf, sizeof(*buf), 0);
+		free(buf);
 		result = 1;
 	}
 	else
@@ -185,16 +189,7 @@ int check_auth_result(struct tcpquery * buff)
 	return r;
 }
 
-char * getH1Key()
-{
-	char * res = malloc(255);
-	int i;
-	for (i = 0; i < 255; ++i)
-	{
-		res[i] = H1[i];
-	}
-	return res;
-}
+
 
 main()
 {
