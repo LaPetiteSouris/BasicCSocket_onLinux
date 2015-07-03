@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"buf",
+				"buff_recv	struct tcpquery *"
+			],
+			[
 				"de",
 				"deserialization_udp(struct udpquery *ptr)	struct udpquery"
 			],
@@ -235,23 +239,15 @@
 			"file": "src/server/tcpserver.c",
 			"settings":
 			{
-				"buffer_size": 6245,
+				"buffer_size": 6306,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "src/serialization/udp_query_packet.c",
+			"file": "src/client/udpclient.c",
 			"settings":
 			{
-				"buffer_size": 2174,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/serialization/udp_query_packet.h",
-			"settings":
-			{
-				"buffer_size": 756,
+				"buffer_size": 2396,
 				"line_ending": "Unix"
 			}
 		}
@@ -321,20 +317,20 @@
 	],
 	"file_history":
 	[
+		"/home/tung/Code/C/SocketC/src/server/udpserver.c",
+		"/home/tung/Code/C/SocketC/src/client/tcpclient.h",
+		"/home/tung/Code/C/SocketC/src/client/tcpclient.c",
+		"/home/tung/Code/C/SocketC/src/server/tcpserver.h",
+		"/home/tung/Code/C/SocketC/src/serialization/udp_query_packet.c",
+		"/home/tung/Code/C/SocketC/src/serialization/tcp_query_packet.c",
+		"/home/tung/Code/C/SocketC/src/server/tcpserver.c",
+		"/home/tung/Code/C/SocketC/src/Makefile",
+		"/home/tung/Code/C/SocketC/src/serialization/udp_query_packet.h",
 		"/home/tung/Code/C/SocketC/src/client/udpclient.c",
 		"/home/tung/Code/C/SocketC/src/server/udpserver.h",
-		"/home/tung/Code/C/SocketC/src/server/udpserver.c",
-		"/home/tung/Code/C/SocketC/src/client/tcpclient.c",
-		"/home/tung/Code/C/SocketC/src/serialization/tcp_query_packet.c",
 		"/home/tung/Code/C/SocketC/src/serialization/tcp_query_packet.h",
-		"/home/tung/Code/C/SocketC/src/serialization/udp_query_packet.c",
-		"/home/tung/Code/C/SocketC/src/serialization/udp_query_packet.h",
-		"/home/tung/Code/C/SocketC/src/server/tcpserver.h",
 		"/home/tung/Code/C/SocketC/src/server/server_start.c",
 		"/home/tung/Code/C/SocketC/src/client/client_start.c",
-		"/home/tung/Code/C/SocketC/src/server/tcpserver.c",
-		"/home/tung/Code/C/SocketC/src/client/tcpclient.h",
-		"/home/tung/Code/C/SocketC/src/Makefile",
 		"/home/tung/Desktop/hi.c",
 		"/home/tung/Code/C/SocketC/src/client/udpclient.h",
 		"/home/tung/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap",
@@ -392,6 +388,22 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"free",
+			"malloc",
+			"serial",
+			"malloc",
+			"seria",
+			"seriali",
+			"buf",
+			"malloc",
+			"buffer",
+			"malloc",
+			"seri",
+			"seriali",
+			"serialize",
+			"seria",
+			"malloc",
+			"maloc",
 			"client_addr",
 			"H1",
 			"H2",
@@ -446,7 +458,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -455,15 +467,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6245,
+						"buffer_size": 6306,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5290,
-								5290
+								2347,
+								2347
 							]
 						],
 						"settings":
@@ -471,134 +483,16 @@
 							"BracketHighlighterBusy": false,
 							"bh_regions":
 							[
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content"
-							],
-							"syntax": "Packages/C Improved/C Improved.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 3876.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "src/serialization/udp_query_packet.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2174,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2116,
-								2116
-							]
-						],
-						"settings":
-						{
-							"BracketHighlighterBusy": false,
-							"bh_regions":
-							[
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
 								"bh_angle_close",
 								"bh_angle_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
@@ -609,37 +503,67 @@
 								"bh_default_open",
 								"bh_default_close",
 								"bh_default_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
 								"bh_regex_close",
-								"bh_regex_content"
+								"bh_regex_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content"
 							],
 							"syntax": "Packages/C Improved/C Improved.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 969.0,
+						"translation.y": 1151.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "src/serialization/udp_query_packet.h",
+					"buffer": 1,
+					"file": "src/client/udpclient.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 756,
+						"buffer_size": 2396,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								2019,
+								2021
 							]
 						],
 						"settings":
@@ -647,21 +571,46 @@
 							"BracketHighlighterBusy": false,
 							"bh_regions":
 							[
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
 								"bh_default_close",
 								"bh_default_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
 								"bh_c_define",
 								"bh_c_define_center",
 								"bh_c_define_open",
@@ -672,45 +621,20 @@
 								"bh_curly_open",
 								"bh_curly_close",
 								"bh_curly_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content"
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content"
 							],
 							"syntax": "Packages/C Improved/C Improved.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 676.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -753,7 +677,7 @@
 	},
 	"output.cc":
 	{
-		"height": 229.0
+		"height": 195.0
 	},
 	"output.find_results":
 	{
