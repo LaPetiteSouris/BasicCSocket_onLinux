@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include "tcpclient.h"
 #include <stdio.h>
-#include "../serialization/tcp_query_packet.h"
 #include "tcpclient.h"
 #include "udpclient.h"
 //H1 verificatino value
