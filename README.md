@@ -8,9 +8,9 @@ Socket Assignment for Distributed System at Tampere University of Technology, Fi
 #How to run project:
 Run make command as below from /src:  <br />
 <i>make sock_server  <br />
-make sock_client </i>
+make sock_client </i>  <br />
 This will generate a sock_server and a sock_client file.
-From terminal, run first <i> ./sock_server </i> to open server socket.
+From terminal, run first <i> ./sock_server </i> to open server socket.  <br />
 Then, from another terminal, navigate to /src and run <i>sock_client</i> to run client.
 Default login is:  <br />
 debug: 111 <br />
