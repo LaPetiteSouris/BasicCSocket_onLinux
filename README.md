@@ -1,6 +1,4 @@
 # BasicCSocket_onLinux
-Basic of Socket programming on Linux
-
 Socket Assignment for Distributed System at Tampere University of Technology, Finland. For details, refer to http://www.cs.tut.fi/~hajap/assignments/socket/.
 
 
