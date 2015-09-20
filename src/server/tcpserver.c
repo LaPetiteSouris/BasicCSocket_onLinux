@@ -24,6 +24,7 @@ int32_t random1_6() {
 
 int  start_TCP_socket()
 {	int result = 0;
+	int pid;
 	//res = "failed";
 	int port = 8080;
 	int socket_fd;
@@ -63,80 +64,88 @@ int  start_TCP_socket()
 				{
 					exit(1);
 				}
-				printf("\n\nReceiving connection from client. \n");
-				for (;;) {
+				pid = fork();
+				if (pid < 0)
+				{
+					perror("Erro creating new process\n");
+					printf("Error pid");
+				}
+				else if(pid==0)
+				{
+					printf("\n\nReceiving connection from client. \n");
+					for (;;) {
 
-					//Receiving connection request from client.This is an username send for verification
-					int n = recv(new_sock, buffer, sizeof(*buffer), 0 );
-					if (n < 0)
-					{
-						printf("Data receiving from socket failed. Exit.\n");
-						exit(1);
-					} else if (n == 0)
-					{
-						printf("Connection closed\n");
-						break;
-					}
-					struct tcpquery incoming = deserialization_tcp(buffer);
-					//Free allocated buffer received
-					free(buffer);
-					if (verify_tcp_packet(&incoming) == 1)
-					{
-						int password = getpassword(incoming.command);
-						if (password != 0)
+						//Receiving connection request from client.This is an username send for verification
+						int n = recv(new_sock, buffer, sizeof(*buffer), 0 );
+						if (n < 0)
 						{
-							if (randomtokenhandling(new_sock) < 0)
+							printf("Data receiving from socket failed. Exit.\n");
+							exit(1);
+						} else if (n == 0)
+						{
+							printf("Connection closed\n");
+							break;
+						}
+						struct tcpquery incoming = deserialization_tcp(buffer);
+						//Free allocated buffer received
+						free(buffer);
+						if (verify_tcp_packet(&incoming) == 1)
+						{
+							int password = getpassword(incoming.command);
+							if (password != 0)
 							{
-								printf("Socket writing error.\n");
-								exit(1);
-							}
-							int n = recv(new_sock, buffer2, sizeof(*buffer2), 0);
-							if (n < 0)
-							{
-								printf("Data receiving from socket failed. Exit.\n");
-								exit(1);
-							} else if (n == 0)
-							{
-								printf("Connection closed\n");
-								break;
-							}
-							if (generateH2value(new_sock, password, R))
-							{
-								if (H_value_compare(buffer2) == 1)
+								if (randomtokenhandling(new_sock) < 0)
 								{
-									printf("Authentication completed. Success...\n");
-									auth_client(new_sock, 1);
-									breaking_signal = 0;
-									result = 1;
-									start_UDP(H2);
+									printf("Socket writing error.\n");
+									exit(1);
+								}
+								int n = recv(new_sock, buffer2, sizeof(*buffer2), 0);
+								if (n < 0)
+								{
+									printf("Data receiving from socket failed. Exit.\n");
+									exit(1);
+								} else if (n == 0)
+								{
+									printf("Connection closed\n");
 									break;
 								}
-								else
+								if (generateH2value(new_sock, password, R))
 								{
-									printf("Authentication Failed\n");
-									auth_client(new_sock, 0);
-									//break;
+									if (H_value_compare(buffer2) == 1)
+									{
+										printf("Authentication completed. Success...\n");
+										auth_client(new_sock, 1);
+										breaking_signal = 0;
+										result = 1;
+										start_UDP(H2);
+										break;
+									}
+									else
+									{
+										printf("Authentication Failed\n");
+										auth_client(new_sock, 0);
+										//break;
+									}
+								} else {
+									printf("Cannot generate authetication token\n");
+									break;
 								}
-							} else {
-								printf("Cannot generate authetication token\n");
+
+							} else
+							{
+								//User not found. Reject connection.
+								printf("User not found. Rejected...\n");
+								rejectconnection(new_sock);
 								break;
 							}
 
 						} else
 						{
-							//User not found. Reject connection.
-							printf("User not found. Rejected...\n");
-							rejectconnection(new_sock);
+							printf("Packet received did not follow defined protocol. Rejected. \n");
 							break;
 						}
-
-					} else
-					{
-						printf("Packet received did not follow defined protocol. Rejected. \n");
-						break;
 					}
 				}
-
 				close(new_sock);
 			}
 			close(socket_fd);
