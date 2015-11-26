@@ -51,7 +51,6 @@ int start_UDP(char key[255])
 					if (packet_verification == 1)
 					{
 						printf("Query follows defined protocol. Accepted. \n");
-						//TODO: HMAC Integrity check
 						int integrity_check = verify_hmac(incoming, key);
 						response_to_client(integrity_check, key, socket_fd, client_address);
 						break;

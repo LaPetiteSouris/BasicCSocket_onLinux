@@ -5,7 +5,7 @@
 #include <openssl/sha.h>
 struct tcpquery pack_tcp_data(char msg[])
 {
-	struct tcpquery data = {"DISTRIB2015", sizeof(struct tcpquery), 'D', ""};
+	struct tcpquery data = {"LINUX2015UPMC", sizeof(struct tcpquery), 'D', ""};
 	strcpy(data.command, msg);
 	return data;
 }
@@ -48,7 +48,7 @@ int verify_tcp_packet(struct tcpquery * ptr)
 	return result;
 
 }
-//TODO: SHA256-signed value must be converted to HEX before trasmission. Never
+//SHA256-signed value must be converted to HEX before trasmission. Never
 //transmit raw binary
 
 struct tcpquery signed_withSHA(char input[])
