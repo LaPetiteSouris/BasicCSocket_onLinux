@@ -15,7 +15,7 @@ int32_t random1_6() {
 }
 
 
-int startUDPClient( char key[255])
+int startUDPClient( char key[255], char *IP, int port)
 {
 	int result = 0;
 //Open a client socket
@@ -38,8 +38,6 @@ int startUDPClient( char key[255])
 		if (bind(socket_fd, (struct sockaddr *)&client_address, sizeof(client_address)) >= 0)
 		{
 			//Declare server connection:
-			char *IP = "127.0.0.1";
-			int port = 8080;
 			struct sockaddr_in server_address;
 			int buff_size = 5;
 			memset((char *)&server_address, 0, sizeof(server_address));

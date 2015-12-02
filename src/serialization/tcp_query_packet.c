@@ -5,7 +5,7 @@
 #include <openssl/sha.h>
 struct tcpquery pack_tcp_data(char msg[])
 {
-	struct tcpquery data = {"LINUX2015UPMC", sizeof(struct tcpquery), 'D', ""};
+	struct tcpquery data = {"UPMC15", sizeof(struct tcpquery), 'D', ""};
 	strcpy(data.command, msg);
 	return data;
 }

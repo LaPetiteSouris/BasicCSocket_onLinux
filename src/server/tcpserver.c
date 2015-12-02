@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <time.h>
+#include "log.h"
 //This is the H2 value(not yet signed by SHA256), generate by server for client verification
 char H2_notsigned[255];
 //This is the H2 value signed by SHA256
@@ -18,15 +19,15 @@ char H2[255];
 int R;
 //If Auth completed,  break the Auth process.
 int breaking_signal = 1;
+
+char log_c[2560] ;
 int32_t random1_6() {
 	return ((rand() % 6) + 1);
 }
 
-int  start_TCP_socket()
+int  start_TCP_socket(int port)
 {	int result = 0;
 	int pid;
-	//res = "failed";
-	int port = 8080;
 	int socket_fd;
 	struct sockaddr_in server_address;
 	socklen_t client_addr_len;
@@ -36,6 +37,7 @@ int  start_TCP_socket()
 	if (socket_fd < 0)
 	{
 		printf("Error in creating socket");
+		log_server("Error in creating socket");
 	} else
 	{
 		//Declare socket address
@@ -49,7 +51,7 @@ int  start_TCP_socket()
 		if (bind(socket_fd, (struct sockaddr *)&server_address, sizeof(server_address)) >= 0)
 		{
 			//Create a struct to store peer address:
-			struct sockaddr peer_addr;
+			struct sockaddr_in peer_addr;
 			memset((char *)&peer_addr, 0, sizeof(peer_addr));
 			socklen_t peer_addr_len = sizeof(peer_addr);
 			listen(socket_fd, 5);
@@ -60,6 +62,8 @@ int  start_TCP_socket()
 			{
 				//Accept connection
 				int new_sock = accept(socket_fd, (struct sockaddr *) &peer_addr, &peer_addr_len );
+				sprintf(log_c, "New connection accpeted from IP %s\n", inet_ntoa(peer_addr.sin_addr));
+				log_server(log_c);
 				if (new_sock == -1)
 				{
 					exit(1);
@@ -68,27 +72,33 @@ int  start_TCP_socket()
 				if (pid < 0)
 				{
 					perror("Erro creating new process\n");
-					printf("Error pid");
+					sprintf(log_c, "Erro creating new process\n");
+					log_server(log_c);
+
+
 				}
-				else if(pid==0)
+				else if (pid == 0)
 				{
-					printf("\n\nReceiving connection from client. \n");
 					for (;;) {
 
 						//Receiving connection request from client.This is an username send for verification
 						int n = recv(new_sock, buffer, sizeof(*buffer), 0 );
 						if (n < 0)
 						{
-							printf("Data receiving from socket failed. Exit.\n");
+							perror("Data receiving from socket failed. Exit.\n");
+							sprintf(log_c, "Data receiving from socket failed. Exit.\n");
+							log_server(log_c);
 							exit(1);
 						} else if (n == 0)
 						{
 							printf("Connection closed\n");
+							sprintf(log_c, "Connection closed\n");
+							log_server(log_c);
 							break;
 						}
 						struct tcpquery incoming = deserialization_tcp(buffer);
 						//Free allocated buffer received
-						free(buffer);
+						//free(buffer);
 						if (verify_tcp_packet(&incoming) == 1)
 						{
 							int password = getpassword(incoming.command);
@@ -96,17 +106,23 @@ int  start_TCP_socket()
 							{
 								if (randomtokenhandling(new_sock) < 0)
 								{
-									printf("Socket writing error.\n");
+									perror("Socket writing error.\n");
+									sprintf(log_c, "Socket writing error.\n");
+									log_server(log_c);
 									exit(1);
 								}
 								int n = recv(new_sock, buffer2, sizeof(*buffer2), 0);
 								if (n < 0)
 								{
-									printf("Data receiving from socket failed. Exit.\n");
+									perror("Data receiving from socket failed. Exit.\n");
+									sprintf(log_c, "Data receiving from socket failed. Exit.\n");
+									log_server(log_c);
 									exit(1);
 								} else if (n == 0)
 								{
 									printf("Connection closed\n");
+									sprintf(log_c, "Connection closed\n");
+									log_server(log_c);
 									break;
 								}
 								if (generateH2value(new_sock, password, R))
@@ -114,20 +130,26 @@ int  start_TCP_socket()
 									if (H_value_compare(buffer2) == 1)
 									{
 										printf("Authentication completed. Success...\n");
+										sprintf(log_c, "Authentication completed. Success...n");
+										log_server(log_c);
 										auth_client(new_sock, 1);
 										breaking_signal = 0;
 										result = 1;
-										start_UDP(H2);
+										start_UDP(H2, port);
 										break;
 									}
 									else
 									{
 										printf("Authentication Failed\n");
+										sprintf(log_c, "Authentication failed\n");
+										log_server(log_c);
 										auth_client(new_sock, 0);
 										//break;
 									}
 								} else {
 									printf("Cannot generate authetication token\n");
+									sprintf(log_c, "Cannot generate authetication token\n");
+									log_server(log_c);
 									break;
 								}
 
@@ -135,6 +157,8 @@ int  start_TCP_socket()
 							{
 								//User not found. Reject connection.
 								printf("User not found. Rejected...\n");
+								sprintf(log_c, "User not found. Rejected...\n");
+								log_server(log_c);
 								rejectconnection(new_sock);
 								break;
 							}
@@ -142,6 +166,8 @@ int  start_TCP_socket()
 						} else
 						{
 							printf("Packet received did not follow defined protocol. Rejected. \n");
+							sprintf(log_c, "Packet received did not follow defined protocol. Rejected.\n");
+							log_server(log_c);
 							break;
 						}
 					}
@@ -149,6 +175,8 @@ int  start_TCP_socket()
 				close(new_sock);
 			}
 			close(socket_fd);
+			free(buffer);
+			free(buffer2);
 
 		}
 
@@ -181,7 +209,7 @@ void rejectconnection(int new_sock)
 	struct tcpquery *buffer = serialization_tcp(query);
 	//Response
 	send(new_sock, buffer, sizeof(*buffer), 0);
-	free(buffer);
+
 }
 
 
@@ -195,7 +223,6 @@ int randomtokenhandling(int new_sock)
 	struct tcpquery query = pack_tcp_data(r);
 	struct tcpquery *buffer = serialization_tcp(query);
 	int n = send(new_sock, buffer, sizeof(*buffer), 0);
-	free(buffer);
 	return n;
 
 }
@@ -238,8 +265,6 @@ int H_value_compare(struct tcpquery * buffer)
 	{
 		printf("Packet received did not follow defined protocol. Rejected. \n");
 	}
-	//Release allocated buffer received. (buffer2)
-	free(buffer);
 	return result;
 }
 
@@ -265,7 +290,6 @@ void auth_client(int new_sock, int i)
 		struct tcpquery *buffer = serialization_tcp(query);
 		//Response
 		send(new_sock, buffer, sizeof(*buffer), 0);
-		free(buffer);
 	}
 	else
 	{
@@ -274,12 +298,17 @@ void auth_client(int new_sock, int i)
 		struct tcpquery *buffer = serialization_tcp(query);
 		//Response
 		send(new_sock, buffer, sizeof(*buffer), 0);
-		free(buffer);
+
 	}
 }
 
 
-main()
+int main(int argc, char ** argv)
 {
-	start_TCP_socket();
+	if (argc != 2) {
+		fprintf(stderr, "usage: %s <port>\n", argv[0]);
+		exit(0);
+	}
+	start_TCP_socket(atoi(argv[1]));
+	return 0;
 }

@@ -26,13 +26,11 @@ char * prompt_and_read(char * prompt) {
 	return response;
 }
 
-int  startTCPClient()
+int  startTCPClient(char * IP, int port)
 {	int result = 0;
 	//Open a client socket
 	int socket_fd;
 	socklen_t client_addr_len;
-	int port = 8080;
-	char *IP = "127.0.0.1";
 	//Open socket here
 	struct sockaddr_in client_address;
 	memset((char *)&client_address, 0, sizeof(client_address));
@@ -107,7 +105,7 @@ int  startTCPClient()
 
 										printf("Authentication completed successfully ! Welcome !...\n");
 										result = 1;
-										startUDPClient(H1);
+										startUDPClient(H1, IP , port);
 										break;
 									} else
 									{
@@ -190,7 +188,13 @@ int check_auth_result(struct tcpquery * buff)
 
 
 
-main()
+int main(int argc, char **argv)
 {
-	startTCPClient();
+	if (argc != 3) {
+		fprintf(stderr, "usage: %s <hostname> <port>\n", argv[0]);
+		exit(0);
+	}
+	startTCPClient(argv[1], atoi(argv[2]));
+
+	return 0;
 }

@@ -7,10 +7,10 @@
 #include <string.h>
 #include <unistd.h>
 #include "../serialization/udp_query_packet.h"
-
-int start_UDP(char key[255])
+#include "log.h"
+char log_c[2560] ;
+int start_UDP(char key[255], int port)
 {	int result = 0;
-	int port = 8080;
 	int socket_fd;
 	struct sockaddr_in server_address;
 	socklen_t client_addr_len;
@@ -19,7 +19,7 @@ int start_UDP(char key[255])
 	socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (socket_fd < 0)
 	{
-		printf("Error in creating socket");
+		perror("Error in creating socket");
 		result = 0;
 	} else
 	{
@@ -40,24 +40,30 @@ int start_UDP(char key[255])
 			struct udpquery incoming;
 			for (;;) {
 				int message_size = recvfrom(socket_fd, buff, sizeof(*buff) , 0, &client_address, &client_addr_len );
-				printf("%s\n", "Server received a query." );
+				printf("%s\n", "UDP Server received a query." );
+				sprintf(log_c, "UDP Server received a query.\n");
+				log_server(log_c);
 				if (message_size > 0 && sizeof(*buff) == sizeof(incoming))
 				{
 					//De-serialization
 					incoming = deserialization_udp(buff);
 					//Free allocated space storing received buffer data
-					free(buff);
+					free(buff)	;
 					int packet_verification = verify_udp_packet(&incoming);
 					if (packet_verification == 1)
 					{
-						printf("Query follows defined protocol. Accepted. \n");
+						printf("UDP Query follows defined protocol. Accepted. \n");
+						sprintf(log_c, "UDP Query follows defined protocol. Accepted. \n");
+						log_server(log_c);
 						int integrity_check = verify_hmac(incoming, key);
 						response_to_client(integrity_check, key, socket_fd, client_address);
 						break;
 					}
 					else if (packet_verification == 0)
 					{
-						printf("Client query does not follow protocol. Rejected. \n\n");
+						printf("UDP: Client query does not follow protocol. Rejected. \n\n");
+						sprintf(log_c, "UDP Query follows defined protocol. Accepted. \n");
+						log_server(log_c);
 						break;
 					}
 				}
@@ -74,7 +80,9 @@ void response_to_client(int result, char key[], int socket_fd, struct sockaddr c
 {
 	if (result == 0)
 	{
-		printf("%s\n", "Sent ping to client.");
+		printf("%s\n", "Sent ping to client and terminated connection\n\n");
+		sprintf(log_c, "Sent ping to client and terminated connection\n");
+		log_server(log_c);
 		struct udpquery query = pack_udp_data(key);
 		//Serialization
 		struct udpquery * buf = serialization_udp(query);
