@@ -80,7 +80,7 @@ void response_to_client(int result, char key[], int socket_fd, struct sockaddr c
 {
 	if (result == 0)
 	{
-		printf("%s\n", "Sent ping to client and terminated connection\n\n");
+		printf("%s\n", "Sent ping to client and terminated connection\n");
 		sprintf(log_c, "Sent ping to client and terminated connection\n");
 		log_server(log_c);
 		struct udpquery query = pack_udp_data(key);

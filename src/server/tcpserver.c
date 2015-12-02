@@ -79,6 +79,7 @@ int  start_TCP_socket(int port)
 				}
 				else if (pid == 0)
 				{
+
 					for (;;) {
 
 						//Receiving connection request from client.This is an username send for verification
@@ -171,9 +172,12 @@ int  start_TCP_socket(int port)
 							break;
 						}
 					}
+					//Child process suicides here
+					exit(0);
 				}
 				close(new_sock);
 			}
+
 			close(socket_fd);
 			free(buffer);
 			free(buffer2);
