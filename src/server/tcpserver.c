@@ -306,11 +306,6 @@ void auth_client(int new_sock, int i)
 
 	}
 }
-void shutdown_by_admin()
-{
-	//breaking_signal=0;
-	//Send message to client for shutting down
-}
 void signal_handler(int signum)
 {
 	//Verify signal received

@@ -65,63 +65,78 @@ int  startTCPClient(char * IP, int port)
 				struct tcpquery * buf = serialization_tcp(query);
 				//Connection established. Start sending data to TCP server
 				printf("Sending data\n");
-				send(socket_fd, buf, sizeof(*buf), 0);
-				free(buf);
-				//Receving response from server
-				struct tcpquery * buff_recv = (struct tcpquery *) malloc(sizeof(struct tcpquery));
-				int n = recv(socket_fd, buff_recv, sizeof(struct tcpquery), 0);
-				if (n < 0)
-				{
-					printf("Connection to server failed");
-					exit(1);
-				} else
+				if (send(socket_fd, buf, sizeof(*buf), 0) > 0)
 				{
 
-					struct tcpquery incoming = deserialization_tcp(buff_recv);
-					int r = verify_tcp_packet(&incoming);
-					if (r == 1)
-					{	//Check servr response if username exists
-						int userexist = strcmp(incoming.command, "0");
-						if (userexist == 0) {
-							printf("Username does not exist.\n");
-							break;
-						}
-						else
-						{
-							//This is a random number received from TCP server_address
-							//We concanate it with user password P2 to generate H1 SH256 hash value
-							char R[255];
-							strncpy(R, incoming.command, sizeof(R));
-							printf("Received response from server. \n");
-							//To-DO: Prompt for user name Password.
-							char * pass = prompt_and_read("Please enter your password: ");
-							if (authenciation(socket_fd, pass, R) == 1)
+					free(buf);
+					//Receving response from server
+					struct tcpquery * buff_recv = (struct tcpquery *) malloc(sizeof(struct tcpquery));
+					int n = recv(socket_fd, buff_recv, sizeof(struct tcpquery), 0);
+					if (n < 0)
+					{
+						printf("Connection to server failed");
+						exit(1);
+					} else if (n > 0)
+					{
+
+						struct tcpquery incoming = deserialization_tcp(buff_recv);
+						int r = verify_tcp_packet(&incoming);
+						if (r == 1)
+						{	//Check servr response if username exists
+							int userexist = strcmp(incoming.command, "0");
+							if (userexist == 0) {
+								printf("Username does not exist.\n");
+								break;
+							}
+							else
 							{
-								//Receive authentication result from server
-								if (recv(socket_fd, buff_recv, sizeof(struct tcpquery), 0) > 0)
+								//This is a random number received from TCP server_address
+								//We concanate it with user password P2 to generate H1 SH256 hash value
+								char R[255];
+								strncpy(R, incoming.command, sizeof(R));
+								printf("Received response from server. \n");
+								//To-DO: Prompt for user name Password.
+								char * pass = prompt_and_read("Please enter your password: ");
+								if (authenciation(socket_fd, pass, R) == 1)
 								{
-									if (check_auth_result(buff_recv))
+									//Receive authentication result from server
+									if (recv(socket_fd, buff_recv, sizeof(struct tcpquery), 0) > 0)
 									{
+										if (check_auth_result(buff_recv))
+										{
 
-										printf("Authentication completed successfully ! Welcome !...\n");
-										result = 1;
-										startUDPClient(H1, IP , port);
-										break;
+											printf("Authentication completed successfully ! Welcome !...\n");
+											result = 1;
+											startUDPClient(H1, IP , port);
+											break;
+										} else
+										{
+											printf("Authentication failed ! Connection terminated for security reason.\n");
+											break;
+										}
+										free(buff_recv);
+
 									} else
 									{
-										printf("Authentication failed ! Connection terminated for security reason.\n");
-										break;
+										printf("Connection to server failed\n");
+										exit(1);
 									}
-									free(buff_recv);
-
-								} else
-								{
-									printf("Connection to server failed\n");
-									exit(1);
 								}
 							}
 						}
 					}
+					else
+					{
+						printf("Connection to server failed\n");
+						exit(1);
+
+					}
+				}
+				else
+				{
+					printf("Connection to server failed\n");
+					exit(1);
+
 				}
 			}
 			close(socket_fd);
