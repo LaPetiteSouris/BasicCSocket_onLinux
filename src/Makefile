@@ -4,7 +4,8 @@ CC = gcc
 DEBUG = -g
 LFLAGS = -lssl -lcrypto 
 CFLAGS = -c 
-
+#All
+all: sock_server sock_client clean
 #Main server object
 
 sock_server :	$(OBJS1)
@@ -45,4 +46,4 @@ log.o : server/log.c server/log.h
 
 
 clean:
-	\rm *.o *~
+	rm *.o 
