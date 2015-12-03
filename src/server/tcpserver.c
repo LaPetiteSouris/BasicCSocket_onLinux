@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include "log.h"
+#include <signal.h>
 //This is the H2 value(not yet signed by SHA256), generate by server for client verification
 char H2_notsigned[255];
 //This is the H2 value signed by SHA256
@@ -305,10 +306,26 @@ void auth_client(int new_sock, int i)
 
 	}
 }
-
-
+void shutdown_by_admin()
+{
+	//breaking_signal=0;
+	//Send message to client for shutting down
+}
+void signal_handler(int signum)
+{
+	//Verify signal received
+	if (signum == SIGINT)
+	{
+		printf("%s\n", "Server site shutdown in emergency by admin\n");
+		sprintf(log_c, "Server site shutdown in emergency by admin.\n");
+		log_server(log_c);
+		//This effectively kill main server processus
+		exit(0);
+	}
+}
 int main(int argc, char ** argv)
 {
+	signal(SIGINT, signal_handler);
 	if (argc != 2) {
 		fprintf(stderr, "usage: %s <port>\n", argv[0]);
 		exit(0);
