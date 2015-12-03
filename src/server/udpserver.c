@@ -9,6 +9,8 @@
 #include "../serialization/udp_query_packet.h"
 #include "log.h"
 char log_c[2560] ;
+//Client IP address
+char ip[256];
 int start_UDP(char key[255], int port)
 {	int result = 0;
 	int socket_fd;
@@ -33,15 +35,16 @@ int start_UDP(char key[255], int port)
 		//Continue socket binding
 		if (bind(socket_fd, (struct sockaddr *)&server_address, sizeof(server_address)) >= 0)
 		{
-			struct sockaddr client_address;
+			struct sockaddr_in client_address;
 			client_addr_len = sizeof(client_address);
 			//Allocate space to receive buffer data
 			struct udpquery * buff = (struct udpquery *)malloc(sizeof(struct udpquery));
 			struct udpquery incoming;
 			for (;;) {
-				int message_size = recvfrom(socket_fd, buff, sizeof(*buff) , 0, &client_address, &client_addr_len );
+				int message_size = recvfrom(socket_fd, buff, sizeof(*buff) , 0,  (struct sockaddr *)&client_address, &client_addr_len );
+				sprintf(ip, "Client IP %s", inet_ntoa(client_address.sin_addr));
 				printf("%s\n", "UDP Server received a query." );
-				sprintf(log_c, "UDP Server received a query.\n");
+				sprintf(log_c, "%s :UDP Server received a query.\n", ip);
 				log_server(log_c);
 				if (message_size > 0 && sizeof(*buff) == sizeof(incoming))
 				{
@@ -53,7 +56,7 @@ int start_UDP(char key[255], int port)
 					if (packet_verification == 1)
 					{
 						printf("UDP Query follows defined protocol. Accepted. \n");
-						sprintf(log_c, "UDP Query follows defined protocol. Accepted. \n");
+						sprintf(log_c, "%s :UDP Query follows defined protocol. Accepted. \n",ip);
 						log_server(log_c);
 						int integrity_check = verify_hmac(incoming, key);
 						response_to_client(integrity_check, key, socket_fd, client_address);
@@ -62,7 +65,7 @@ int start_UDP(char key[255], int port)
 					else if (packet_verification == 0)
 					{
 						printf("UDP: Client query does not follow protocol. Rejected. \n\n");
-						sprintf(log_c, "UDP Query follows defined protocol. Accepted. \n");
+						sprintf(log_c, "%s :UDP Query follows defined protocol. Accepted. \n",ip);
 						log_server(log_c);
 						break;
 					}
@@ -76,12 +79,12 @@ int start_UDP(char key[255], int port)
 	return result;
 }
 
-void response_to_client(int result, char key[], int socket_fd, struct sockaddr client_address)
+void response_to_client(int result, char key[], int socket_fd, struct sockaddr_in client_address)
 {
 	if (result == 0)
 	{
 		printf("%s\n", "Sent ping to client and terminated connection\n");
-		sprintf(log_c, "Sent ping to client and terminated connection\n");
+		sprintf(log_c, "%s :Sent ping to client and terminated connection\n",ip);
 		log_server(log_c);
 		struct udpquery query = pack_udp_data(key);
 		//Serialization
