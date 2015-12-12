@@ -11,4 +11,5 @@ int verifyH1(int socket_fd, char H1[]);
 int sizecheck(char array1[], char array2[]);
 void auth_client(int socket_fd, int i);
 void signal_handler(int signum);
+void displaylog();
 #endif

@@ -1,5 +1,3 @@
-#include "tcpserver.h"
-#include "udpserver.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
@@ -12,6 +10,8 @@
 #include <time.h>
 #include "log.h"
 #include <signal.h>
+#include "tcpserver.h"
+#include "udpserver.h"
 //This is the H2 value(not yet signed by SHA256), generate by server for client verification
 char H2_notsigned[255];
 //This is the H2 value signed by SHA256
@@ -20,8 +20,10 @@ char H2[255];
 int R;
 //If Auth completed,  break the Auth process.
 int breaking_signal = 1;
-
+//Logging message
 char log_c[2560] ;
+//Client IP address
+char ip[256];
 int32_t random1_6() {
 	return ((rand() % 6) + 1);
 }
@@ -63,7 +65,8 @@ int  start_TCP_socket(int port)
 			{
 				//Accept connection
 				int new_sock = accept(socket_fd, (struct sockaddr *) &peer_addr, &peer_addr_len );
-				sprintf(log_c, "New connection accpeted from IP %s\n", inet_ntoa(peer_addr.sin_addr));
+				sprintf(ip, "Client IP %s", inet_ntoa(peer_addr.sin_addr));
+				sprintf(log_c, "New connection accpeted from IP %s\n", ip);
 				log_server(log_c);
 				if (new_sock == -1)
 				{
@@ -88,13 +91,13 @@ int  start_TCP_socket(int port)
 						if (n < 0)
 						{
 							perror("Data receiving from socket failed. Exit.\n");
-							sprintf(log_c, "Data receiving from socket failed. Exit.\n");
+							sprintf(log_c, "%s :Data receiving from socket failed. Exit.\n", ip);
 							log_server(log_c);
 							exit(1);
 						} else if (n == 0)
 						{
 							printf("Connection closed\n");
-							sprintf(log_c, "Connection closed\n");
+							sprintf(log_c, "%s :Connection closed\n", ip);
 							log_server(log_c);
 							break;
 						}
@@ -109,7 +112,7 @@ int  start_TCP_socket(int port)
 								if (randomtokenhandling(new_sock) < 0)
 								{
 									perror("Socket writing error.\n");
-									sprintf(log_c, "Socket writing error.\n");
+									sprintf(log_c, "%s :Socket writing error.\n", ip);
 									log_server(log_c);
 									exit(1);
 								}
@@ -117,13 +120,13 @@ int  start_TCP_socket(int port)
 								if (n < 0)
 								{
 									perror("Data receiving from socket failed. Exit.\n");
-									sprintf(log_c, "Data receiving from socket failed. Exit.\n");
+									sprintf(log_c, "%s :Data receiving from socket failed. Exit.\n", ip);
 									log_server(log_c);
 									exit(1);
 								} else if (n == 0)
 								{
 									printf("Connection closed\n");
-									sprintf(log_c, "Connection closed\n");
+									sprintf(log_c, "%s :Connection closed\n", ip);
 									log_server(log_c);
 									break;
 								}
@@ -132,7 +135,7 @@ int  start_TCP_socket(int port)
 									if (H_value_compare(buffer2) == 1)
 									{
 										printf("Authentication completed. Success...\n");
-										sprintf(log_c, "Authentication completed. Success...n");
+										sprintf(log_c, "%s :Authentication completed. Success...\n", ip);
 										log_server(log_c);
 										auth_client(new_sock, 1);
 										breaking_signal = 0;
@@ -143,14 +146,14 @@ int  start_TCP_socket(int port)
 									else
 									{
 										printf("Authentication Failed\n");
-										sprintf(log_c, "Authentication failed\n");
+										sprintf(log_c, "%s :Authentication failed\n",ip);
 										log_server(log_c);
 										auth_client(new_sock, 0);
 										//break;
 									}
 								} else {
 									printf("Cannot generate authetication token\n");
-									sprintf(log_c, "Cannot generate authetication token\n");
+									sprintf(log_c, "%s :Cannot generate authetication token\n", ip);
 									log_server(log_c);
 									break;
 								}
@@ -159,7 +162,7 @@ int  start_TCP_socket(int port)
 							{
 								//User not found. Reject connection.
 								printf("User not found. Rejected...\n");
-								sprintf(log_c, "User not found. Rejected...\n");
+								sprintf(log_c, "%s :User not found. Rejected...\n", ip);
 								log_server(log_c);
 								rejectconnection(new_sock);
 								break;
@@ -168,7 +171,7 @@ int  start_TCP_socket(int port)
 						} else
 						{
 							printf("Packet received did not follow defined protocol. Rejected. \n");
-							sprintf(log_c, "Packet received did not follow defined protocol. Rejected.\n");
+							sprintf(log_c, "%s :Packet received did not follow defined protocol. Rejected.\n", ip);
 							log_server(log_c);
 							break;
 						}
@@ -317,10 +320,31 @@ void signal_handler(int signum)
 		//This effectively kill main server processus
 		exit(0);
 	}
+
+	if(signum==SIGUSR1)
+	{
+		printf("%s\n", "Signal SIGUSR1 is detected, all all connection information will be displayed: \n");
+		displaylog();
+		printf("%s\n", "Log END..... \n");
+
+	}
+}
+
+void displaylog()
+{
+	int c;
+	FILE *file;
+	file = fopen("logfile", "r");
+	if (file) {
+		while ((c = getc(file)) != EOF)
+			putchar(c);
+		fclose(file);
+	}
 }
 int main(int argc, char ** argv)
 {
 	signal(SIGINT, signal_handler);
+	signal(SIGUSR1, signal_handler);
 	if (argc != 2) {
 		fprintf(stderr, "usage: %s <port>\n", argv[0]);
 		exit(0);
